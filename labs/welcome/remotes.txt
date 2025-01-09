@@ -1,4 +1,4 @@
-origin  git@github.com:Redstoneweewee/CS24-Projects.git (fetch)
-origin  git@github.com:Redstoneweewee/CS24-Projects.git (push)
+origin  git@github.com:Redstoneweewee/w25.git (fetch)
+origin  git@github.com:Redstoneweewee/w25.git (push)
 upstream        git@github.com:ucsb-cs24/w25.git (fetch)
 upstream        git@github.com:ucsb-cs24/w25.git (push)
