@@ -5,7 +5,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
     //test if the number of arguments is correct. If not, return error.
     if(argc > 2) {
-        cerr << "USAGE: caprot [rotation]\n";
+        cerr << "USAGE: caprot [rotation]";
         exit(1);
     }
 
