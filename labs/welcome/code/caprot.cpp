@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     }
 
     //save rotation
-    int rotation = stoi(argv[1]);
+    long long int rotation = stoi(argv[1]);
 
     //otherwise, read the next line
     string input;
