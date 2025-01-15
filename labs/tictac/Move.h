@@ -7,19 +7,27 @@
 // but you must print moves in the expected format.
 
 #include <string>
+#include <vector>
 
 struct Move {
-  // Member Variables
-  int  number;
-  char player;
-  int  row;
-  int  column;
+    // Member Variables
+    int number;
+    char player;
+    int row;
+    int column;
 
-  // The constructor parses a string.
-  Move(const std::string& input);
+    // The constructor parses a string.
+    Move(const std::string& input);
 
-  // Helper to render a Move as text.
-  std::string to_string() const;
+    // Helper to render a Move as text.
+    std::string to_string() const;
+
+    //Helper functions
+    private:
+        char rowToString() const;
+        int rowCharToInt(char c) const;
+        void checkAttributes(std::vector<char> attributesAsChars) const;
+        std::vector<char> parseStringIntoAttributesAsChar(std::string input) const;
 };
 
 #endif
