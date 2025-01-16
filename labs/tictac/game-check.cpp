@@ -38,16 +38,16 @@ int main(int argc, char **argv) {
         std::string line;
         std::getline(std::cin, line);
         /////////////////////////std::cout << "line: [" << line << "]\n";
-        if(gameState == NewGame && line == "") {
+        if(line == "") {
             std::cout << gameText;
             return 0;
         }
-        else if(line == "") {
-            if(lastMove.player == 'X') { gameText = getGameText(gameState, 'O'); }
-            else                       { gameText = getGameText(gameState, 'X'); }
-            std::cout << gameText;
-            return 0;
-        }
+        //else if(line == "") {
+        //    if(lastMove.player == 'X') { gameText = getGameText(gameState, 'O'); }
+        //    else                       { gameText = getGameText(gameState, 'X'); }
+        //    std::cout << gameText;
+        //    return 0;
+        //}
         //If error Move class automatically throws an error
         Move move;
         try {
@@ -124,10 +124,10 @@ std::string getGameText(GameState gameState, char player) {
             break;
         case Continuing:
             if(player == 'X') {
-                return "Game in progress: X's turn.\n";
+                return "Game in progress: O's turn.\n";
             }
             else if(player == 'O') {
-                return "Game in progress: O's turn.\n";
+                return "Game in progress: X's turn.\n";
             }
             break;
         case XWin:
