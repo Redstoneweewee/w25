@@ -72,7 +72,7 @@ void Move::checkAttributes(std::vector<char> attributesAsChars) const {
     if(columnTest != 1 && columnTest != 2 && columnTest != 3) { errorMessage += "Test #7 failed. Invalid column range, expected: [1 to 3], actual: ["+std::to_string(columnTest)+"]\n"; success = false; }
 
     if(!success) {
-        throw ParseError("");
+        throw ParseError(errorMessage);
     }
 }
 
