@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     } 
     catch (const ParseError &e) {
         if (verbose) {
-            std::cout << "Parse error: " << e.what() << '\n';
+            std::cout << "Parse error: \n" << e.what() << '\n';
         } else {
             std::cout << "Parse error.\n";
         }

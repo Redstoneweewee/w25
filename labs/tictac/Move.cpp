@@ -53,29 +53,27 @@ void Move::checkAttributes(std::vector<char> attributesAsChars) const {
     bool success = true;
     std::string errorMessage = "";
     //Test #1 - vector size check
-    if(attributesAsChars.size() != 4) { errorMessage = "Test #1 failed. Invalid vector size, expected: [4], actual: ["+std::to_string(attributesAsChars.size())+"]"; success = false; }
+    if(attributesAsChars.size() != 4) { errorMessage += "Test #1 failed. Invalid vector size, expected: [4], actual: ["+std::to_string(attributesAsChars.size())+"]\n"; success = false; }
     //Test #2 - number should be an int
-    if(!isdigit(attributesAsChars[0])) { errorMessage = "Test #2 failed. Invalid var type for number, expected: [int]"; success = false; }
+    if(!isdigit(attributesAsChars[0])) { errorMessage += "Test #2 failed. Invalid var type for number, expected: [int]\n"; success = false; }
     //Test #3 - column should be an int
-    if(!isdigit(attributesAsChars[3])) { errorMessage = "Test #3 failed. Invalid var type for column, expected: [int]"; success = false; }
+    if(!isdigit(attributesAsChars[3])) { errorMessage += "Test #3 failed. Invalid var type for column, expected: [int]\n"; success = false; }
 
     //Test #4 - number should be [1, 9]
     int numberTest = attributesAsChars[0] - '0';
-    if(numberTest < 1 || numberTest > 9) { errorMessage = "Test #4 failed. Invalid number range, expected: [1 to 9], actual: ["+std::to_string(numberTest)+"]"; success = false; }
+    if(numberTest < 1 || numberTest > 9) { errorMessage += "Test #4 failed. Invalid number range, expected: [1 to 9], actual: ["+std::to_string(numberTest)+"]\n"; success = false; }
     //Test #5 - player should be 'X' or 'O'
     char playerTest = std::toupper(attributesAsChars[1]);
-    if(playerTest != 'X' && playerTest != 'O') { errorMessage = "Test #5 failed. Invalid player char, expected: ['X', 'x', 'O', or 'o'], actual: ["+std::to_string(attributesAsChars[1])+"]"; success = false; }
+    if(playerTest != 'X' && playerTest != 'O') { errorMessage += "Test #5 failed. Invalid player char, expected: ['X', 'x', 'O', or 'o'], actual: ["+std::string(1, attributesAsChars[1])+"]\n"; success = false; }
     //Test #6 - row should be 'A', 'B', or 'C'
     char rowTest = std::toupper(attributesAsChars[2]);
-    if(rowTest != 'A' && rowTest != 'B' && rowTest != 'C') { errorMessage = "Test #6 failed. Invalid row char, expected: ['A', 'a', 'B', 'b', 'C', or 'c'], actual: ["+std::to_string(attributesAsChars[2])+"]"; success = false; }
+    if(rowTest != 'A' && rowTest != 'B' && rowTest != 'C') { errorMessage += "Test #6 failed. Invalid row char, expected: ['A', 'a', 'B', 'b', 'C', or 'c'], actual: ["+std::string(1, attributesAsChars[2])+"]\n"; success = false; }
     //Test #7 - column should be 1, 2, or 3
     int columnTest = attributesAsChars[3] - '0';
-    if(columnTest != 1 && columnTest != 2 && columnTest != 3) { errorMessage = "Test #6 failed. Invalid column range, expected: [1 to 3], actual: ["+std::to_string(columnTest)+"]"; success = false; }
+    if(columnTest != 1 && columnTest != 2 && columnTest != 3) { errorMessage += "Test #7 failed. Invalid column range, expected: [1 to 3], actual: ["+std::to_string(columnTest)+"]\n"; success = false; }
 
     if(!success) {
-        throw InvalidMove(errorMessage);
-        std::cout << "Invalid move.\n";
-        exit(2);
+        throw ParseError(errorMessage);
     }
 }
 
@@ -86,10 +84,4 @@ std::string Move::to_string() const {
                        + std::to_string(column);
     //output ex. 1 X B2
     return output;
-}
-
-int main() {
-    Move test("1 o b5 # Opps...");
-    std::cout << test.to_string();
-    return 0;
 }
