@@ -27,10 +27,10 @@ std::vector<char> Move::parseStringIntoAttributesAsChar(std::string input) const
     }
     std::vector<char> attributesAsChars;
     for(unsigned int i=0; i<input.size(); i++) {
-        if(input[i] == '#' && input[i-1] != ' ') { 
+        if(input[i] == '#' && !std::isspace(input[i-1])) { 
             throw ParseError("Invalid comment.");
         }
-        else if(input[i] == '#' && input[i-1] == ' ') {
+        else if(input[i] == '#' && std::isspace(input[i-1])) {
             break;
         }
         if(attributesAsChars.size() > 5 && std::isspace(input[i])) {
