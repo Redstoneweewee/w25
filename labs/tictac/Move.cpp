@@ -21,11 +21,22 @@ Move::Move(const std::string& input) {
 }
 
 std::vector<char> Move::parseStringIntoAttributesAsChar(std::string input) const {
-    //Assumes that all comments start with a '#'
+    
+    if(input.size() < 6) {
+        throw ParseError("Invalid input.");
+    }
     std::vector<char> attributesAsChars;
     for(unsigned int i=0; i<input.size(); i++) {
-        if(input[i] == '#') { break; }
-        if(i > 5 && std::isspace(input[i])) {
+        if(input[i] == '#' && input[i-1] != ' ') { 
+            throw ParseError("Invalid comment.");
+        }
+        else if(input[i] == '#' && input[i-1] == ' ') {
+            break;
+        }
+        if(attributesAsChars.size() > 5 && std::isspace(input[i])) {
+            continue;
+        }
+        if(attributesAsChars.size() > 0 && std::isspace(attributesAsChars[attributesAsChars.size()-1]) && std::isspace(input[i])) {
             continue;
         }
         attributesAsChars.push_back(input[i]);
