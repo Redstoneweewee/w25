@@ -22,9 +22,9 @@ Move::Move(const std::string& input) {
 
 std::vector<char> Move::parseStringIntoAttributesAsChar(std::string input) const {
     
-    //if(input.size() < 6) {
-    //    throw ParseError("Invalid input.");
-    //}
+    if(input.size() < 6) {
+        throw ParseError("Invalid input.");
+    }
     std::vector<char> attributesAsChars;
     for(unsigned int i=0; i<input.size(); i++) {
         if(input[i] == '#' && input[i-1] != ' ') { 
