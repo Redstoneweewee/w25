@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
             move = Move(line);
         } 
         catch(const ParseError &e) {
-            std::cout << "Parse error.\n" << (verbose? e.what() : "\n");
+            std::cout << "Parse error.\n" << (verbose? e.what() : "");
             return 1;
         }
 
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
             board.tryAddMove(move.row, move.column, move.player);
         }
         catch(const InvalidMove &e) {
-            std::cout << "Invalid Move.\n" << (verbose? e.what() : "\n");
+            std::cout << "Invalid Move.\n" << (verbose? e.what() : "");
             return 2;
         }
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
         }
     }
     catch(const InvalidMove &e) {
-        std::cout << "Invalid Move.\n" << (verbose? e.what() : "\n");
+        std::cout << "Invalid Move.\n" << (verbose? e.what() : "");
         return 2;
     }
 
