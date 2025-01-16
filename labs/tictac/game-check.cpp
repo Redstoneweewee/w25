@@ -44,6 +44,9 @@ int main(int argc, char **argv) {
         }
 
         try {
+            if((gameState == XWin || gameState == OWin) && line == "") {
+                continue;
+            }
             if(gameState == XWin || gameState == OWin) {
                 throw InvalidMove("Invalid move. The game is finished but more moves were found.");
             }
