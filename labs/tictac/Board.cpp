@@ -39,6 +39,7 @@ void Board::printGridForTesting() {
 void Board::tryAddMove(int row, int column, char player) {
     if(grid[row-1][column-1] != Unclaimed) {
         throw InvalidMove("Invalid Move. Tried to claim a claimed square.");
+        exit(2);
     }
     
     if(player == 'X') {

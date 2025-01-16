@@ -56,6 +56,7 @@ int main() {
     std::getline(std::cin, extraLines);
     if(extraLines != "") {
         throw InvalidMove("Invalid Move. The game is finished but more moves were found.");
+        exit(2);
     }
 
     std::cout << gameText;
@@ -66,9 +67,9 @@ void checkRules(Move lastMove, Move move) {
     if(lastMove.number == -1) { return; }
     //Auto tested: nums cannot be 1< or >9
     //Test #1: Move number is correctly ordered
-    if(move.number != lastMove.number + 1) { throw InvalidMove("Invalid move. Turn number is out of ourder."); }
+    if(move.number != lastMove.number + 1) { throw InvalidMove("Invalid move. Turn number is out of ourder."); exit(2); }
     //Test #2: Players are alternating
-    if(move.player == lastMove.player) { throw InvalidMove("Invalid move. A player went twice in a row."); }
+    if(move.player == lastMove.player) { throw InvalidMove("Invalid move. A player went twice in a row."); exit(2); }
 }
 
 
