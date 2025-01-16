@@ -38,8 +38,9 @@ int main(int argc, char **argv) {
         std::string line;
         std::getline(std::cin, line);
         /////////////////////////std::cout << "line: [" << line << "]\n";
-        if(line == "") {
-            continue;
+        if(line == "" && gameState == NewGame) {
+            std::cout << gameText;
+            return 0;
         }
 
         try {
