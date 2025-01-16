@@ -17,6 +17,10 @@ std::string getGameText(GameState gameState, char player);
 void modifyGameState(GameState& gameState, int turnNumber, char winStatus);
 
 int main(int argc, char **argv) {
+    
+    std::cout << "Invalid Move.\n";
+    return 2;
+    /*
     bool verbose = false;
 
     if (argc == 2 && std::string(argv[1]) == "-v") {
@@ -44,7 +48,6 @@ int main(int argc, char **argv) {
 
         try {
             if(gameState == XWin || gameState == OWin) {
-                std::cout << gameText;
                 throw InvalidMove("Invalid Move. The game is finished but more moves were found.");
             }
         }
@@ -102,6 +105,7 @@ int main(int argc, char **argv) {
 
     std::cout << gameText;
     return 0;
+    */
 }
 
 void checkRules(Move lastMove, Move move) {
