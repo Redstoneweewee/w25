@@ -33,15 +33,17 @@ int main(int argc, char **argv) {
     Move lastMove;
     gameText = getGameText(gameState, '0');
     
+    int count = 0;
     //TODO - while loop to parse each move
-    while(gameState == NewGame || gameState == Continuing) {
+    while((gameState == NewGame || gameState == Continuing) && count < 10) {
         std::string line;
         std::getline(std::cin, line);
         /////////////////////////std::cout << "line: [" << line << "]\n";
         if(line == "") {
-            std::cout << gameText;
-            return 0;
+            count++;
+            continue;
         }
+        count = 0;
         //else if(line == "") {
         //    if(lastMove.player == 'X') { gameText = getGameText(gameState, 'O'); }
         //    else                       { gameText = getGameText(gameState, 'X'); }
