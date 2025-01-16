@@ -1,13 +1,14 @@
-#ifndef MOVE_H
-#define MOVE_H
+#ifndef SQUARE_H
+#define SQUARE_H
 
 #include <string>
 #include <vector>
 
-enum SquareState {
+enum Square {
     Unclaimed,
     X,
     O
 };
+
 
 #endif

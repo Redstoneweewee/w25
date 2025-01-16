@@ -9,6 +9,13 @@
 //
 
 // Space for implementing Move functions.
+Move::Move() {
+    number = -1;
+    player = '0';
+    row = -1;
+    column = -1;
+}
+
 Move::Move(const std::string& input) {
     std::vector<char> attributesAsChars = parseStringIntoAttributesAsChar(input);
 
