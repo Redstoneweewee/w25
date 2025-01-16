@@ -33,17 +33,28 @@ int main(int argc, char **argv) {
     Move lastMove;
     gameText = getGameText(gameState, '0');
     
-    int count = 0;
     //TODO - while loop to parse each move
-    while((gameState == NewGame || gameState == Continuing) && count < 10) {
+    while(!std::cin.eof()) {
         std::string line;
         std::getline(std::cin, line);
         /////////////////////////std::cout << "line: [" << line << "]\n";
         if(line == "") {
-            count++;
             continue;
         }
-        count = 0;
+
+        try {
+            if(gameState == XWin || gameState == OWin) {
+                throw InvalidMove("Invalid Move. The game is finished but more moves were found.");
+            }
+        }
+        catch(const InvalidMove &e) {
+            if (verbose) {
+                std::cout << "Invalid Move: \n" << e.what() << '\n';
+            } else {
+                std::cout << "Invalid Move.\n";
+            }
+            return 2;
+        }
         //else if(line == "") {
         //    if(lastMove.player == 'X') { gameText = getGameText(gameState, 'O'); }
         //    else                       { gameText = getGameText(gameState, 'X'); }
@@ -86,21 +97,6 @@ int main(int argc, char **argv) {
         modifyGameState(gameState, move.number, board.testForWin());
         gameText = getGameText(gameState, move.player);
         lastMove = move;
-    }
-    try {
-        std::string extraLines = "";
-        std::getline(std::cin, extraLines);
-        if(extraLines != "") {
-            throw InvalidMove("Invalid Move. The game is finished but more moves were found.");
-        }
-    }
-    catch(const InvalidMove &e) {
-        if (verbose) {
-            std::cout << "Invalid Move: \n" << e.what() << '\n';
-        } else {
-            std::cout << "Invalid Move.\n";
-        }
-        return 2;
     }
 
     std::cout << gameText;
