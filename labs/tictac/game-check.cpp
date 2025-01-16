@@ -44,6 +44,7 @@ int main(int argc, char **argv) {
 
         try {
             if(gameState == XWin || gameState == OWin) {
+                std::cout << gameText;
                 throw InvalidMove("Invalid Move. The game is finished but more moves were found.");
             }
         }
