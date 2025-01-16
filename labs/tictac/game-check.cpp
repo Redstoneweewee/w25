@@ -18,7 +18,7 @@ void modifyGameState(GameState& gameState, int turnNumber, char winStatus);
 
 int main(int argc, char **argv) {
     
-    std::cout << "Invalid Move.\n";
+    std::cout << "Invalid move.\n";
     return 2;
     /*
     bool verbose = false;
