@@ -54,7 +54,12 @@ int main(int argc, char **argv) {
             move = Move(line);
         } 
         catch(const ParseError &e) {
-            std::cout << "Parse error.\n" << (verbose? e.what() : "");
+            if (verbose) {
+                std::cout << "Parse error: \n" << e.what() << '\n';
+            } else {
+                std::cout << "Parse error.\n";
+            }
+
             return 1;
         }
 
@@ -64,8 +69,12 @@ int main(int argc, char **argv) {
             board.tryAddMove(move.row, move.column, move.player);
         }
         catch(const InvalidMove &e) {
-            std::cout << "Invalid Move.\n" << (verbose? e.what() : "");
-            exit(2);
+            if (verbose) {
+                std::cout << "Invalid Move: \n" << e.what() << '\n';
+            } else {
+                std::cout << "Invalid Move.\n";
+            }
+            return 2;
         }
 
         //Use each move to fill up the board
@@ -84,8 +93,12 @@ int main(int argc, char **argv) {
         }
     }
     catch(const InvalidMove &e) {
-        std::cout << "Invalid Move.\n" << (verbose? e.what() : "");
-        exit(2);
+        if (verbose) {
+            std::cout << "Invalid Move: \n" << e.what() << '\n';
+        } else {
+            std::cout << "Invalid Move.\n";
+        }
+        return 2;
     }
 
     std::cout << gameText;
