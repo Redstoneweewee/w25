@@ -16,7 +16,17 @@ void checkRules(Move lastMove, Move move);
 std::string getGameText(GameState gameState, char player);
 void modifyGameState(GameState& gameState, int turnNumber, char winStatus);
 
-int main() {
+int main(int argc, char **argv) {
+    bool verbose = false;
+
+    if (argc == 2 && std::string(argv[1]) == "-v") {
+        verbose = true;
+    }
+
+    if (verbose) {
+        std::cout << "> ";
+    }
+
     GameState gameState = NewGame;
     std::string gameText = "";
     Board board;
@@ -39,24 +49,43 @@ int main() {
             return 0;
         }
         //If error Move class automatically throws an error
-        Move move = Move(line);
+        Move move;
+        try {
+            move = Move(line);
+        } 
+        catch(const ParseError &e) {
+            std::cout << "Parse error.\n" << (verbose? e.what() : "\n");
+            return 1;
+        }
 
-        //TODO - Use each move to fill up the board
-        checkRules(lastMove, move);
-        board.tryAddMove(move.row, move.column, move.player);
+
+        try {
+            checkRules(lastMove, move);
+            board.tryAddMove(move.row, move.column, move.player);
+        }
+        catch(const InvalidMove &e) {
+            std::cout << "Invalid Move.\n" << (verbose? e.what() : "\n");
+            return 2;
+        }
+
+        //Use each move to fill up the board
         /////////////////////////board.printGridForTesting();
         /////////////////////////std::cout << "has won: "<< board.testForWin() << "\n";
+
         modifyGameState(gameState, move.number, board.testForWin());
         gameText = getGameText(gameState, move.player);
-        //TODO - print out game states while happening
-        //TODO - print errors when they occur
         lastMove = move;
     }
-    std::string extraLines = "";
-    std::getline(std::cin, extraLines);
-    if(extraLines != "") {
-        throw InvalidMove("Invalid Move. The game is finished but more moves were found.");
-        exit(2);
+    try {
+        std::string extraLines = "";
+        std::getline(std::cin, extraLines);
+        if(extraLines != "") {
+            throw InvalidMove("Invalid Move. The game is finished but more moves were found.");
+        }
+    }
+    catch(const InvalidMove &e) {
+        std::cout << "Invalid Move.\n" << (verbose? e.what() : "\n");
+        return 2;
     }
 
     std::cout << gameText;
@@ -67,9 +96,9 @@ void checkRules(Move lastMove, Move move) {
     if(lastMove.number == -1) { return; }
     //Auto tested: nums cannot be 1< or >9
     //Test #1: Move number is correctly ordered
-    if(move.number != lastMove.number + 1) { throw InvalidMove("Invalid move. Turn number is out of ourder."); exit(2); }
+    if(move.number != lastMove.number + 1) { throw InvalidMove("Invalid move. Turn number is out of ourder."); }
     //Test #2: Players are alternating
-    if(move.player == lastMove.player) { throw InvalidMove("Invalid move. A player went twice in a row."); exit(2); }
+    if(move.player == lastMove.player) { throw InvalidMove("Invalid move. A player went twice in a row."); }
 }
 
 
