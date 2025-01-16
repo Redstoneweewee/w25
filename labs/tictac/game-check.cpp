@@ -17,10 +17,6 @@ std::string getGameText(GameState gameState, char player);
 void modifyGameState(GameState& gameState, int turnNumber, char winStatus);
 
 int main(int argc, char **argv) {
-    
-    std::cout << "Invalid move.\n";
-    return 2;
-    /*
     bool verbose = false;
 
     if (argc == 2 && std::string(argv[1]) == "-v") {
@@ -48,14 +44,14 @@ int main(int argc, char **argv) {
 
         try {
             if(gameState == XWin || gameState == OWin) {
-                throw InvalidMove("Invalid Move. The game is finished but more moves were found.");
+                throw InvalidMove("Invalid move. The game is finished but more moves were found.");
             }
         }
         catch(const InvalidMove &e) {
             if (verbose) {
-                std::cout << "Invalid Move: \n" << e.what() << '\n';
+                std::cout << "Invalid move: \n" << e.what() << '\n';
             } else {
-                std::cout << "Invalid Move.\n";
+                std::cout << "Invalid move.\n";
             }
             return 2;
         }
@@ -87,9 +83,9 @@ int main(int argc, char **argv) {
         }
         catch(const InvalidMove &e) {
             if (verbose) {
-                std::cout << "Invalid Move: \n" << e.what() << '\n';
+                std::cout << "Invalid move: \n" << e.what() << '\n';
             } else {
-                std::cout << "Invalid Move.\n";
+                std::cout << "Invalid move.\n";
             }
             return 2;
         }
@@ -105,7 +101,6 @@ int main(int argc, char **argv) {
 
     std::cout << gameText;
     return 0;
-    */
 }
 
 void checkRules(Move lastMove, Move move) {

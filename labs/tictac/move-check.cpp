@@ -4,9 +4,6 @@
 #include "Move.h"
 
 int main(int argc, char **argv) {
-    std::cout << "Parse error.\n";
-    return 1;
-    /*
     bool verbose = false;
 
     if (argc == 2 && std::string(argv[1]) == "-v") {
@@ -34,5 +31,4 @@ int main(int argc, char **argv) {
 
         return 1;
     }
-    */
 }
