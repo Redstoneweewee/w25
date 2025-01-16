@@ -26,7 +26,6 @@ std::vector<char> Move::parseStringIntoAttributesAsChar(std::string input) const
     for(char c : input) {
         if(std::isspace(c)) { continue; }
         if(c == '#') { break; }
-        std::cout << c << std::endl;
         attributesAsChars.push_back(c);
     }
     //ex. of after this for-loop runs: 
