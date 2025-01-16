@@ -21,7 +21,7 @@ int main() {
     std::string gameText = "";
     Board board;
     Move lastMove;
-    gameText += getGameText(gameState, '0');
+    gameText = getGameText(gameState, '0');
     
     //TODO - while loop to parse each move
     while(gameState == NewGame || gameState == Continuing) {
@@ -33,8 +33,8 @@ int main() {
             return 0;
         }
         else if(line == "") {
-            if(lastMove.player == 'X') { gameText += getGameText(gameState, 'O'); }
-            else                       { gameText += getGameText(gameState, 'X'); }
+            if(lastMove.player == 'X') { gameText = getGameText(gameState, 'O'); }
+            else                       { gameText = getGameText(gameState, 'X'); }
             std::cout << gameText;
             return 0;
         }
@@ -47,7 +47,7 @@ int main() {
         /////////////////////////board.printGridForTesting();
         /////////////////////////std::cout << "has won: "<< board.testForWin() << "\n";
         modifyGameState(gameState, move.number, board.testForWin());
-        gameText += getGameText(gameState, move.player);
+        gameText = getGameText(gameState, move.player);
         //TODO - print out game states while happening
         //TODO - print errors when they occur
         lastMove = move;
