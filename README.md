@@ -22,7 +22,8 @@ _Assignments are due before midnight Pacific Time._
 | Name                    | Due
 |-------------------------|-----
 | [Welcome](labs/welcome) | January 14th
-| [TicTac](labs/tictac)   | January 21st
+| [TicTac](labs/tictac)   | January 22nd
+| [FibVec](labs/fibvec)   | January 28th
 
 
 ## Lectures
@@ -35,6 +36,9 @@ _11:00 to 12:15 Mondays and Wednesdays in TD-W 1701_
 | January   8th | Git
 | January  13th | Compilation; memory layout
 | January  15th | Constructors and Destructors
+| January  20th | _Martin Luther King Day: No lecture!_
+| January  22nd | Exceptions; const member functions; vectors
+| January  27th | Big-O notation; _Quiz 1: Bring your ID and a pen/pencil!_
 
 
 [piazza]: https://piazza.com/ucsb/winter2025/cs24
