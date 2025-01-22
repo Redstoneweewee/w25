@@ -38,7 +38,10 @@ int main(int argc, char **argv) {
         std::string line;
         std::getline(std::cin, line);
         /////////////////////////std::cout << "line: [" << line << "]\n";
-        if(line == "") {
+        if(line == "" && lastMove.number == -1) {
+            continue;
+        }
+        if(line == "" && std::cin.eof()) {
             continue;
         }
 
