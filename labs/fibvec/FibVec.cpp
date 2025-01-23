@@ -32,7 +32,7 @@ size_t FibVec::count() const {
 void FibVec::insert(int value, size_t index) {
     //TODO - Make sure the index is in bound of count or + 1
     //     - if not, throw error
-    checkIndexOutOfRange(index, mCount+1);
+    checkIndexOutOfRange(index, mCount);
 
     //TODO - check if pushing will increase count past capacity
     //     - If so, resize the fibVector fibonacially
@@ -50,7 +50,7 @@ void FibVec::insert(int value, size_t index) {
 int FibVec::lookup(size_t index) const {
     //TODO - Make sure the index is in bound of count
     //     - if not throw
-    checkIndexOutOfRange(index, mCount);
+    checkIndexOutOfRange(index, mCount-1);
     
     //     - if so return the value
     return mFibVecPointer[index];
@@ -80,7 +80,7 @@ void FibVec::push(int value) {
 int FibVec::remove(size_t index) {
     //TODO - Make sure the index is in bound of count
     //     - if not, throw error
-    checkIndexOutOfRange(index, mCount);
+    checkIndexOutOfRange(index, mCount-1);
 
     //     - if so, must <--- push all after to the left & decrease count by 1
     int removedValue = mFibVecPointer[index];
