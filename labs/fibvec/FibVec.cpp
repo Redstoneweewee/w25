@@ -8,41 +8,64 @@
 
 // Constructor and Destructor
 FibVec::FibVec() {
-    fibVecPointer = new int[1];
+    mFibVecPointer = new int[1];
 }
 FibVec::~FibVec() {
-    delete fibVecPointer;
+    delete mFibVecPointer;
 }
 
-// Member Functions
-unsigned long int FibVec::capacity() const {
-    return 0;
+
+
+size_t FibVec::capacity() const {
+    return mCapacity;
 }
 
-unsigned long int FibVec::count() const {
-    return 0;
-}
-
-//can throw std::out_of_range exception
-void FibVec::insert(int value, unsigned long int index) {
-
+size_t FibVec::count() const {
+    return mCount;
 }
 
 //can throw std::out_of_range exception
-int FibVec::lookup(unsigned long int index) const {
+void FibVec::insert(int value, size_t index) {
+    //TODO - Make sure the index is in bound of count or + 1
+    //     - if not, throw error
+    checkOutOfRange(index+1);
+
+    //TODO - check if pushing will increase count past capacity
+    //     - If so, resize the fibVector fibonacially
+
+    //     - if so, move all --> to the right and add element
+}
+
+//can throw std::out_of_range exception
+int FibVec::lookup(size_t index) const {
+    //TODO - Make sure the index is in bound of count
+    checkOutOfRange(mCount);
+
+    //     - if not throw
+    //     - if so return the value
     return 1;
 }
 
 //can throw std::underflow_error exception
 int FibVec::pop() {
+    //TODO - make sure the count > 0
+    //     - if not throw error
+    //     - if so just decrease count by 1
     return 1;
 }
 
 void FibVec::push(int value) {
-
+    //TODO - check if pushing will increase count past capacity
+    //     - If so, resize the fibVector fibonacially
+    //Otherwise, just add value
 }
 
 //can throw std::out_of_range exception
-int FibVec::remove(unsigned long int index) {
+int FibVec::remove(size_t index) {
+    //TODO - Make sure the index is in bound of count
+    checkOutOfRange(mCount);
+
+    //     - if not, throw error
+    //     - if so, must <--- push all after to the left & decrease count by 1
     return 1;
 }
