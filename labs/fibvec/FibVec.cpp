@@ -16,6 +16,7 @@ FibVec::FibVec() {
 }
 FibVec::~FibVec() {
     delete [] mFibVecPointer;
+    mFibVecPointer = NULL;
 }
 
 
