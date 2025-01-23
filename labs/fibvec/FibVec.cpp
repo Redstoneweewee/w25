@@ -37,10 +37,11 @@ void FibVec::insert(int value, size_t index) {
     //TODO - check if pushing will increase count past capacity
     //     - If so, resize the fibVector fibonacially
     tryGrowCapacity(mCount+1);
-
     //     - if so, move all --> to the right and add element
-    for(size_t i=mCount-1; i>=index; i--) {
-        mFibVecPointer[i+1] = mFibVecPointer[i];
+    if(mCount != 0) {
+        for(size_t i=mCount-1; i>=index; i--) {
+            mFibVecPointer[i+1] = mFibVecPointer[i];
+        }
     }
     mFibVecPointer[index] = value;
     mCount++;
@@ -113,6 +114,7 @@ size_t FibVec::getFibCapacity(size_t fibNum) const {
 }
 
 void FibVec::tryGrowCapacity(size_t newCount) {
+    //std::cout << "newCount: " << newCount << ", mCapacity: " << mCapacity << "\n";
     if(newCount <= mCapacity) { return; }
 
     mFibNum++;

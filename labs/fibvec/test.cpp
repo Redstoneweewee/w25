@@ -8,6 +8,11 @@ void printFibVec(FibVec fibvec);
 
 int main() {
     FibVec fibvec;
+    fibvec.insert(10, 0);
+    std::cout << "count: " << fibvec.count() << "\n";
+    std::cout << "value: " << fibvec.lookup(0) << "\n";
+
+    /*
     for(size_t i=0; i<100; i++) {
         fibvec.push(i);
     }
@@ -21,6 +26,7 @@ int main() {
         std::cout << "removed value " << fibvec.pop() << "\n";
     }
     printFibVec(fibvec);
+    */
 
     return 0;
 }
