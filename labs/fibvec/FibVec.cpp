@@ -15,11 +15,11 @@ FibVec::~FibVec() {
 }
 
 // Member Functions
-unsigned int FibVec::capacity() {
+unsigned int FibVec::capacity() const {
     return 0;
 }
 
-unsigned int FibVec::count() {
+unsigned int FibVec::count() const {
     return 0;
 }
 
@@ -29,7 +29,7 @@ void FibVec::insert(int value, unsigned int index) {
 }
 
 //can throw std::out_of_range exception
-int FibVec::lookup(unsigned int index) {
+int FibVec::lookup(unsigned int index) const {
     return 1;
 }
 
