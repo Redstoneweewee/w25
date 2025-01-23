@@ -15,21 +15,21 @@ FibVec::~FibVec() {
 }
 
 // Member Functions
-unsigned int FibVec::capacity() const {
+unsigned long int FibVec::capacity() const {
     return 0;
 }
 
-unsigned int FibVec::count() const {
+unsigned long int FibVec::count() const {
     return 0;
 }
 
 //can throw std::out_of_range exception
-void FibVec::insert(int value, unsigned int index) {
+void FibVec::insert(int value, unsigned long int index) {
 
 }
 
 //can throw std::out_of_range exception
-int FibVec::lookup(unsigned int index) const {
+int FibVec::lookup(unsigned long int index) const {
     return 1;
 }
 
@@ -43,6 +43,6 @@ void FibVec::push(int value) {
 }
 
 //can throw std::out_of_range exception
-int FibVec::remove(unsigned int index) {
+int FibVec::remove(unsigned long int index) {
     return 1;
 }
