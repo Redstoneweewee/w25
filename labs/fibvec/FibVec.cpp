@@ -39,8 +39,8 @@ void FibVec::insert(int value, size_t index) {
     tryGrowCapacity(mCount+1);
     //     - if so, move all --> to the right and add element
     if(mCount != 0) {
-        for(size_t i=mCount-1; i>=index; i--) {
-            mFibVecPointer[i+1] = mFibVecPointer[i];
+        for(size_t i=mCount; i>index; i--) {
+            mFibVecPointer[i] = mFibVecPointer[i-1];
         }
     }
     mFibVecPointer[index] = value;
@@ -65,6 +65,7 @@ int FibVec::pop() {
         throw std::underflow_error("Tried to pop an empty FibVec.");
     }
     //     - if so just use remove() on the last element
+    //std::cout << "removed at "<< mCount-1 << "\n";
     return remove(mCount-1);
 }
 
@@ -87,6 +88,7 @@ int FibVec::remove(size_t index) {
     int removedValue = mFibVecPointer[index];
     mCount--;
     for(size_t i=index; i<mCount; i++) {
+        //std::cout << "i: " << i << " --> left: " << mFibVecPointer[i] << ", right: " << mFibVecPointer[i+1]<<"\n";
         mFibVecPointer[i] = mFibVecPointer[i+1];
     }
 

@@ -8,11 +8,15 @@ void printFibVec(FibVec fibvec);
 
 int main() {
     FibVec fibvec;
-    fibvec.insert(10, 0);
-    std::cout << "count: " << fibvec.count() << "\n";
-    std::cout << "value: " << fibvec.lookup(0) << "\n";
+    //for(size_t i=0; i<10; i++) {
+    //    fibvec.push(i);
+    //}
+    //fibvec.insert(10, 0);
+    //printFibVec(fibvec);
+    //std::cout << "count: " << fibvec.count() << "\n";
+    //std::cout << "value: " << fibvec.lookup(0) << "\n";
 
-    /*
+    
     for(size_t i=0; i<100; i++) {
         fibvec.push(i);
     }
@@ -23,15 +27,17 @@ int main() {
     //std::getline(std::cin, breakingPoint);
     //fibvec.remove(49);
     for(size_t i=0; i<46; i++) {
-        std::cout << "removed value " << fibvec.pop() << "\n";
+        fibvec.remove(0);
+        //std::cout << "removed value " << fibvec.pop() << "\n";
     }
     printFibVec(fibvec);
-    */
+    
 
     return 0;
 }
 
 void printFibVec(FibVec fibvec) {
+    std::cout << "count: " << fibvec.count() << "\n";
     for(size_t i=0; i<fibvec.count(); i++) {
         std::cout << i << ": " << fibvec.lookup(i) << "\n";
     }
