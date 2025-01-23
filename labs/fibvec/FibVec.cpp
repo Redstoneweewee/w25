@@ -9,6 +9,8 @@
 // Constructor and Destructor
 FibVec::FibVec() {
     mFibVecPointer = new int[1];
+    mCapacity = 1;
+    mCount = 0;
 }
 FibVec::~FibVec() {
     delete mFibVecPointer;
