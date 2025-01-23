@@ -12,12 +12,12 @@ class FibVec {
     size_t mCount;
 
     // Helper Functions
-    void checkIndexOutOfRange(size_t index, size_t max) const;
+    void checkIndexOutOfRange(size_t index, size_t maxOrEqual) const;
     size_t getFibCapacity(size_t fibNum) const;
     void tryGrowCapacity(size_t newCount);
     void tryShrinkCapacity(size_t newCount);
     void modifyCapacity();
-    
+
     public:
         // Constructor and Destructor
         FibVec();
