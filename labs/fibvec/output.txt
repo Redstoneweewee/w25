@@ -1,0 +1,226 @@
+  popped -721261
+  Underflow.
+  Underflow.
+  Index out of range.
+  count = 0
+  capacity = 1
+  Index out of range.
+  Index out of range.
+  count = 0
+  capacity = 1
+  Index out of range.
+  popped 379560
+  Index out of range.
+  popped 916302
+  count = 12
+  capacity = 13
+  Index out of range.
+  popped -906353 -673503 -309671
+  popped 358392 691175
+  Index out of range.
+  Index out of range.
+  popped -190428
+  removed -46737
+  removed 573005
+  count = 14
+  capacity = 21
+  fibvec[8] = -93100
+  removed -816016
+  count = 18
+  capacity = 21
+  Index out of range.
+  removed -6525
+  removed -697451
+  Index out of range.
+  count = 25
+  capacity = 34
+  fibvec[16] = 28800
+  removed -939464
+  count = 26
+  capacity = 34
+  fibvec[2] = -726328
+  Index out of range.
+  count = 26
+  capacity = 34
+  Index out of range.
+  Index out of range.
+  removed -884077
+  popped -141447 -697440 -680485
+  count = 23
+  capacity = 34
+  fibvec[20] = 849189
+  removed -903996
+  removed 413873
+  removed 145714
+  count = 22
+  capacity = 34
+  fibvec[13] = 28800
+  popped -208625
+  Index out of range.
+  count = 22
+  capacity = 34
+  fibvec[2] = 460698
+  removed 325904
+  removed 735300
+  removed 759513
+  popped 652489 -103908
+  removed 890309
+  removed -137622
+  removed -761501
+  Index out of range.
+  removed 460698
+  removed -710750
+  count = 41
+  capacity = 55
+  fibvec[38] = -142136
+  popped -588054 415563 -612470
+  count = 52
+  capacity = 55
+  fibvec[50] = 471581
+  count = 53
+  capacity = 55
+  fibvec[38] = -292383
+  removed 753214
+  count = 63
+  capacity = 89
+  fibvec[30] = -652629
+  removed -845300
+  popped 714928 827590
+  count = 70
+  capacity = 89
+  fibvec[27] = 720501
+  Index out of range.
+  removed 646721
+  popped 565598 975576
+  popped 406022 6391
+  count = 66
+  capacity = 89
+  fibvec[37] = -142136
+  removed -153602
+  removed 914730
+  removed 342175
+  removed 871304
+  popped -584513
+  popped 485821 -213376
+  count = 94
+  capacity = 144
+  fibvec[17] = -663397
+  removed 849189
+  removed 367755
+  count = 92
+  capacity = 144
+  Index out of range.
+  removed -453356
+  removed 764243
+  count = 104
+  capacity = 144
+  fibvec[78] = 547938
+  Index out of range.
+  popped -465129
+  count = 109
+  capacity = 144
+  fibvec[26] = 142304
+  popped -178333 453550 790176
+  popped 518972 -811811 178264
+  popped 429036
+  count = 109
+  capacity = 144
+  fibvec[80] = 148458             //this one
+  popped 168548 -937777
+  count = 119
+  capacity = 144
+  fibvec[86] = 771762
+  removed 451801
+  count = 119
+  capacity = 144
+  fibvec[67] = 18300
+  popped -698043
+  count = 125
+  capacity = 144
+  fibvec[10] = 610758
+  removed -93100
+  popped -620968 755219
+  popped 954673
+  count = 123
+  capacity = 144
+  fibvec[65] = -340904
+  removed 264273
+  popped -468576
+  removed -793706
+  removed -920274
+  count = 120
+  capacity = 144
+  fibvec[63] = 596527
+  removed -340904
+  removed 459035
+  popped -718830 617140 727764
+  popped 958641 741859
+  removed -762433
+  removed -120822
+  count = 111
+  capacity = 144
+  fibvec[95] = 659107
+  removed -290468
+  popped -214244 -85775 257255
+  count = 113
+  capacity = 144
+  fibvec[112] = -280113
+  removed -104611
+  popped -280113 659423
+  removed -397878
+  removed 851934
+  count = 110
+  capacity = 144
+  fibvec[109] = -360802
+  removed 558533
+  popped -360802
+  count = 109
+  capacity = 144
+  fibvec[57] = -909355
+  popped 422002
+  count = 108
+  capacity = 144
+  fibvec[45] = -765639
+  popped 212761 445986
+  count = 108
+  capacity = 144
+  fibvec[63] = 205932
+  removed -697259
+  popped -507526
+  removed -693680
+  popped -127547 -188572 407281
+  count = 110
+  capacity = 144
+  fibvec[33] = -652629
+  count = 111
+  capacity = 144
+  fibvec[23] = -250202
+  count = 119
+  capacity = 144
+  fibvec[93] = -301398
+  popped 437149 -41466 -362739
+  popped -996315 -342783
+  count = 124
+  capacity = 144
+  fibvec[8] = 338458
+  popped -637158 93132
+  removed -304614
+  popped -675401 33429 435207
+  count = 120
+  capacity = 144
+  fibvec[53] = -722321
+  popped -629853
+  removed -153907
+  count = 119
+  capacity = 144
+  fibvec[28] = 720501
+  popped -875749
+  popped -426960
+  count = 117
+  capacity = 144
+  fibvec[114] = -723724
+  popped 887081 -284124
+  popped -343258
+  count = 127
+  capacity = 144
+  fibvec[107] = -481109

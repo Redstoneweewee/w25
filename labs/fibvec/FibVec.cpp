@@ -13,6 +13,7 @@ FibVec::FibVec() {
     mFibNum = 2;
     mCapacity = 1;
     mCount = 0;
+    //std::cout << "testing\n";
 }
 FibVec::~FibVec() {
     delete [] mFibVecPointer;
@@ -75,7 +76,8 @@ void FibVec::push(int value) {
     //     - If so, resize the fibVector fibonacially
     tryGrowCapacity(mCount+1);
     //Otherwise, just add value
-    mFibVecPointer[mCount] = value;
+    mFibVecPointer[mCount] = value;                //---------Invalid write?
+    //std::cout << "wrote " << value << " to index " << mCount << "; capacity: " << mCapacity << "\n";
     mCount++;
 }
 
@@ -137,8 +139,10 @@ void FibVec::modifyCapacity() {
     int* temp = mFibVecPointer;
     mFibVecPointer = new int[mCapacity];
     for(size_t i=0; i<mCount; i++) {
-        mFibVecPointer[i] = temp[i];
+        mFibVecPointer[i] = temp[i];                //---------Invalid read?
+        //std::cout << "read " << temp[i] << " from index " << i << "; capacity: " << mCapacity << "\n";
         //std::cout << "added back: " << i << ", " << mFibVecPointer[i] << "\n";
     }
     delete [] temp;
+    temp = NULL;
 }
