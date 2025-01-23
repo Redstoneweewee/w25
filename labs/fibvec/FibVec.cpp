@@ -110,7 +110,10 @@ void FibVec::checkIndexOutOfRange(size_t index, size_t maxOrEqual) const {
 }
 
 size_t FibVec::getFibCapacity(size_t fibNum) const {
-    if(fibNum <= 2) {
+    if(fibNum == 0) {
+        return 0;
+    }
+    else if(fibNum <= 2) {
         return 1;
     }
     else {

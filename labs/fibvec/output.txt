@@ -125,7 +125,7 @@
   popped 429036
   count = 109
   capacity = 144
-  fibvec[80] = 148458             //this one
+  fibvec[80] = 148458
   popped 168548 -937777
   count = 119
   capacity = 144
