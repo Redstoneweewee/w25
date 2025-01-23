@@ -3,11 +3,10 @@
 
 // This provides the size_t type:
 #include <cstddef>
-#include <vector>
 
 class FibVec {
     // Member Variables
-    std::vector<int>* vectorPointer;
+    int* fibVecPointer;
     // Helper Functions
 
    public:

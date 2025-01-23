@@ -8,10 +8,10 @@
 
 // Constructor and Destructor
 FibVec::FibVec() {
-    vectorPointer = new std::vector<int>(1);
+    fibVecPointer = new int[1];
 }
 FibVec::~FibVec() {
-    delete vectorPointer;
+    delete fibVecPointer;
 }
 
 // Member Functions
