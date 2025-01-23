@@ -7,13 +7,17 @@
 class FibVec {
     // Member Variables
     int* mFibVecPointer;
+    size_t mFibNum;
     size_t mCapacity;
     size_t mCount;
 
     // Helper Functions
-    //void checkOutOfRange(size_t max) const;
-    //void growCapacity(size_t previousCapacity);
-
+    void checkIndexOutOfRange(size_t index, size_t max) const;
+    size_t getFibCapacity(size_t fibNum) const;
+    void tryGrowCapacity(size_t newCount);
+    void tryShrinkCapacity(size_t newCount);
+    void modifyCapacity();
+    
     public:
         // Constructor and Destructor
         FibVec();
