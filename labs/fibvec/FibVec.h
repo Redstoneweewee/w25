@@ -11,8 +11,8 @@ class FibVec {
     size_t mCount;
 
     // Helper Functions
-    void checkOutOfRange(size_t max) const;
-    void growCapacity(size_t previousCapacity);
+    //void checkOutOfRange(size_t max) const;
+    //void growCapacity(size_t previousCapacity);
 
     public:
         // Constructor and Destructor
