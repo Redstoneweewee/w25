@@ -24,4 +24,4 @@ FibVec.o: FibVec.cpp FibVec.h
 
 
 clean:
-	rm -f test test.o FibVec.o
+	del -f test.exe test.o FibVec.o
