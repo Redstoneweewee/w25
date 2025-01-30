@@ -2,6 +2,12 @@
 #include <iostream>
 #include <stdexcept>
 
+
+//Helper functions
+size_t getInsertIndexFromAsciiSort(const Node* node, const std::string& value);
+bool isStringAsciiLesserOrEqual(const std::string& str1, const std::string& str2);
+
+
 List::List() {
     head = new Node;
 }
