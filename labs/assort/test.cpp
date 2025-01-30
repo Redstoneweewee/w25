@@ -13,10 +13,11 @@ int main() {
     list.insert("ZAthary");
     list.insert("russia");
     list.print();
-    list.print(true);
 
-    List list2(list);
-    list2.print();
-    list2.print(true);
+    list.remove(2);
+    list.remove(2);
+    list.remove(2);
+    list.remove(2);
+    list.print();
     return 0;
 }

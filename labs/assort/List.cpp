@@ -87,6 +87,7 @@ const std::string& List::lookup(size_t index) const {
         current++;
     }
     throw std::out_of_range("Out of bounds. Tried to lookup at index "+std::to_string(index)+" but the Linked List's size is "+std::to_string(count()));
+    exit(1);
 }
 
 void List::print(bool reverse) const {
@@ -118,6 +119,7 @@ std::string List::remove(size_t index) {
     if(index == 0) {
         if(count() == 0) {
             throw std::out_of_range("Tried to remove from an empty Linked List.");
+            exit(1);
         }
         Node* removeNode = head;
         head = head->next;
@@ -141,7 +143,7 @@ std::string List::remove(size_t index) {
         current++;
     }
     throw std::out_of_range("Out of bounds. Tried to remove at index "+std::to_string(index)+" but the Linked List's size is "+std::to_string(count()));
-
+    exit(1);
 }
 
 size_t List::remove(const std::string& value) {
