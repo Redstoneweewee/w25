@@ -21,10 +21,10 @@ void List::insert(const std::string& value) {
 }
 
 const std::string& List::lookup(size_t index) const {
-    return "";
+    return head->data;
 }
 
-void List::print(bool reverse = false) const {
+void List::print(bool reverse) const {
 
 }
 
@@ -32,6 +32,6 @@ std::string List::remove(size_t index) {
     return "";
 }
 
-size_t remove(const std::string& value) {
+size_t List::remove(const std::string& value) {
     return 0;
 }
