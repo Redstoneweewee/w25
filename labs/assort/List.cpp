@@ -9,7 +9,7 @@ bool isStringAsciiLesserOrEqual(const std::string& str1, const std::string& str2
 
 
 List::List() {
-    head = new Node;
+    head = NULL;
 }
 
 List::List(const List& other) {
@@ -45,13 +45,17 @@ size_t List::count() const {
 void List::insert(const std::string& value) {
     //TODO - append the value in the correct index after sort detection
     size_t insertIndex = getInsertIndexFromAsciiSort(head, value);
+    std::cout << "insertIndex:" << insertIndex << "\n";
     if(insertIndex == 0) {
+        Node* afterNode = head;
+        head = new Node;
         head->data = value;
+        head->next = afterNode;
     }
     else {
         Node* beforeNode = head;
         for(size_t i=0; i<insertIndex-1; i++) {
-            beforeNode = head->next;
+            beforeNode = beforeNode->next;
         }
         Node* afterNode = beforeNode->next;
 
@@ -81,13 +85,14 @@ void List::print(bool reverse) const {
     if(!reverse) {
         std::string output = "[";
         while(nextNode != NULL) {
-            output += nextNode->data + ", ";
+            output += (nextNode->data + ", ");
             nextNode = nextNode->next;
         }
         output = output.substr(0, output.size()-2);
         output += "]\n";
         std::cout << output;
     }
+    /*
     else {
         std::string output = "";
         while(nextNode != NULL) {
@@ -98,6 +103,7 @@ void List::print(bool reverse) const {
         output = "[" + output + "]\n";
         std::cout << output;
     }
+    */
 }
 
 std::string List::remove(size_t index) {
