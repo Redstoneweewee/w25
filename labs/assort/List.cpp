@@ -14,11 +14,22 @@ List::List() {
 
 List::List(const List& other) {
     //TODO - make a new node from each node in other
-    Node* nextNode = other.head;
-    while(nextNode != NULL) {
+    head = NULL;
+    Node* otherNextNode = other.head;
+    if(otherNextNode != NULL) {
+        head = new Node();
+        head->data = otherNextNode->data;
+        //head->next = NULL;
+        otherNextNode = otherNextNode->next;
+    }
+
+    Node* previousNode = head;
+    while(otherNextNode != NULL) {
         Node* newNode = new Node();
-        newNode->data = nextNode->data;
-        nextNode = nextNode->next;
+        previousNode->next = newNode;
+        newNode->data = otherNextNode->data;
+        previousNode = newNode;
+        otherNextNode = otherNextNode->next;
     }
 }
 
@@ -45,7 +56,6 @@ size_t List::count() const {
 void List::insert(const std::string& value) {
     //TODO - append the value in the correct index after sort detection
     size_t insertIndex = getInsertIndexFromAsciiSort(head, value);
-    std::cout << "insertIndex:" << insertIndex << "\n";
     if(insertIndex == 0) {
         Node* afterNode = head;
         head = new Node;
@@ -92,7 +102,6 @@ void List::print(bool reverse) const {
         output += "]\n";
         std::cout << output;
     }
-    /*
     else {
         std::string output = "";
         while(nextNode != NULL) {
@@ -103,7 +112,6 @@ void List::print(bool reverse) const {
         output = "[" + output + "]\n";
         std::cout << output;
     }
-    */
 }
 
 std::string List::remove(size_t index) {

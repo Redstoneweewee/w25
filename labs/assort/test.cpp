@@ -7,16 +7,16 @@
 int main() {
     List list;
     list.insert("china");
-    list.print();
     list.insert("russia");
-    list.print();
     list.insert("BOLIVIA");
-    list.print();
     list.insert("zathary");
-    list.print();
     list.insert("ZAthary");
-    list.print();
     list.insert("russia");
     list.print();
+    list.print(true);
+
+    List list2(list);
+    list2.print();
+    list2.print(true);
     return 0;
 }
