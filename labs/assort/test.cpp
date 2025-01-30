@@ -6,9 +6,10 @@
 
 int main() {
     List list;
+    list.insert("china");
     list.print();
 
-    list.remove("weraefge");
+    list.remove("wefw");
     list.print();
     return 0;
 }

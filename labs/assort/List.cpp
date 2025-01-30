@@ -19,7 +19,7 @@ List::List(const List& other) {
     if(otherNextNode != NULL) {
         head = new Node();
         head->data = otherNextNode->data;
-        //head->next = NULL;
+        head->next = NULL;
         otherNextNode = otherNextNode->next;
     }
 
@@ -28,6 +28,7 @@ List::List(const List& other) {
         Node* newNode = new Node();
         previousNode->next = newNode;
         newNode->data = otherNextNode->data;
+        newNode->next = NULL;
         previousNode = newNode;
         otherNextNode = otherNextNode->next;
     }
@@ -127,7 +128,9 @@ std::string List::remove(size_t index) {
         delete removeNode;
         return removedString;
     }
-
+    else if(count() <= 1) {
+        throw std::out_of_range("Out of bounds. Tried to remove at index "+std::to_string(index)+" but the Linked List's size is "+std::to_string(count()));
+    }
     size_t current = 1;
     Node* beforeNode = head;
     Node* removeNode = beforeNode->next;
@@ -151,12 +154,16 @@ size_t List::remove(const std::string& value) {
     if(head == NULL) {
         return count; 
     }
-    
+
     while(head != NULL && head->data == value) {
         Node* removeNode = head;
         head = head->next;
         delete removeNode;
         count++;
+    }
+
+    if(this->count() <= 1) {
+        return count;
     }
     
     Node* beforeNode = head;
