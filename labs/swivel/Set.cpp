@@ -78,7 +78,7 @@ void Set::print() const {
 }
 
 size_t Set::remove(const std::string& value) {
-    if(!swivel(value)) { 
+    if(!swivel(value)) {
         return 0;
     }
     Node* deleteNode = mRoot;
@@ -106,10 +106,10 @@ size_t Set::remove(const std::string& value) {
 
 bool Set::swivel(const std::string& value) {
     if(mRoot == NULL) { return false; }
-    if(contains(value)) { 
-        mRoot = mRoot->swivelTree(value);
-        return true;
-    }
+    
+    mRoot = mRoot->swivelTree(value);
+
+    if(contains(value)) { return true; }
     return false;
 }
 
