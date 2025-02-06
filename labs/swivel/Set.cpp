@@ -12,7 +12,8 @@ Set::Set() {
 
 Set::Set(const Set& other) {
     if(other.mRoot == NULL) {
-        Set();
+        mRoot = NULL;
+        mCount = 0;
     }
     else {
         mRoot = other.mRoot->createCopy();
