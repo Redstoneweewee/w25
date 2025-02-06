@@ -1,5 +1,8 @@
 #include "Set.h"
 
+bool checkNullNode(Node* node);
+
+
 Set::Set() {
     mRoot = NULL;
     mCount = 0;
@@ -18,23 +21,25 @@ Set::Set(Set&& other) {
 }
 
 Set::~Set() {
-
+    clear();
 }
 
 
 size_t Set::clear() {
     size_t removeCount = 0;
-    if(mRoot != NULL) {
-        test();
+    if(checkNullNode(mRoot)) {
+        removeCount += mRoot->removeTree();
     }
+    return removeCount;
 }
 
 bool Set::contains(const std::string& value) const {
-    return false;
+    if(checkNullNode(mRoot)) { return false; }
+    return mRoot->treeContains(value);
 }
 
 size_t Set::count() const {
-    return 0;
+    return mCount;
 }
 
 void Set::debug() {
@@ -42,6 +47,7 @@ void Set::debug() {
 }
 
 size_t Set::insert(const std::string& value) {
+    
     return 0;
 }
 
@@ -58,7 +64,7 @@ bool Set::swivel(const std::string& value) {
 }
 
 
-
-void Set::test() {
-
+bool checkNullNode(Node* node) {
+    if(node == NULL) { return true; }
+    return false;
 }
