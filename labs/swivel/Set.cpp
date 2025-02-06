@@ -1,5 +1,7 @@
 #include "Set.h"
 
+#include <iostream>
+
 bool isNullNode(Node* node);
 
 
@@ -53,13 +55,21 @@ void Set::debug() {
 size_t Set::insert(const std::string& value) {
     if(isNullNode(mRoot)) {
         mRoot = new Node(value);
+        mCount++;
         return 1;
     }
-    return mRoot->insertIntoTree(value);
+    size_t insertSuccess = mRoot->insertIntoTree(value);
+    if(insertSuccess == 1) { mCount++; }
+    return insertSuccess;
 }
 
 void Set::print() const {
-
+    if(isNullNode(mRoot)) {
+        std::cout << "-\n";
+    }
+    else {
+        std::cout << mRoot->treeToString() << "\n";
+    }
 }
 
 size_t Set::remove(const std::string& value) {

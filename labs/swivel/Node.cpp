@@ -1,10 +1,5 @@
 #include "Node.h"
 
-Node::Node() {
-    left  = NULL;
-    right = NULL;
-}
-
 Node::Node(std::string data) {
     this->data = data;
     left  = NULL;
@@ -68,4 +63,16 @@ size_t Node::insertIntoTree(std::string value) {
     else {
         return 0;
     }
+}
+
+std::string Node::treeToString() {
+    std::string leftString;
+    std::string rightString;
+
+    if(this->left != NULL) { leftString = this->left->treeToString(); }
+    else { leftString = "-"; }
+    if(this->right != NULL) { rightString = this->right->treeToString(); }
+    else { rightString = "-"; }
+
+    return "("+leftString+" "+this->data+" "+rightString+")";
 }
