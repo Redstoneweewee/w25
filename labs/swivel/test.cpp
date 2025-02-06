@@ -6,21 +6,16 @@
 
 int main() {
   Set set;
-  set.insert("r");
-  set.insert("a");
-  set.insert("t");
-  set.insert("d");
-  set.insert("v");
+  set.insert("y");
+  set.insert("z");
+  set.insert("n");
   set.insert("e");
+  set.insert("r");
+  set.insert("p");
+  set.insert("t");
   set.print();
-  set.swivel("a");
+  set.remove("n");
   set.print();
-
-  Set set2(set);
-  set2.print();
-  set.clear();
   
-  set.print();
-  set2.print();
   return 0;
 }

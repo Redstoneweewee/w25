@@ -35,7 +35,7 @@ Set::~Set() {
 
 size_t Set::clear() {
     size_t removeCount = 0;
-    if(!isNullNode(mRoot)) {
+    if(mRoot != NULL) {
         removeCount += mRoot->removeTree();
         mRoot = NULL;
     }
@@ -44,7 +44,7 @@ size_t Set::clear() {
 }
 
 bool Set::contains(const std::string& value) const {
-    if(isNullNode(mRoot)) { return false; }
+    if(mRoot == NULL) { return false; }
     return mRoot->treeContains(value);
 }
 
@@ -57,7 +57,7 @@ void Set::debug() {
 }
 
 size_t Set::insert(const std::string& value) {
-    if(isNullNode(mRoot)) {
+    if(mRoot == NULL) {
         mRoot = new Node(value);
         mCount++;
         return 1;
@@ -68,7 +68,7 @@ size_t Set::insert(const std::string& value) {
 }
 
 void Set::print() const {
-    if(isNullNode(mRoot)) {
+    if(mRoot == NULL) {
         std::cout << "-\n";
     }
     else {
@@ -95,9 +95,8 @@ size_t Set::remove(const std::string& value) {
     }
     else {
         std::string swivelValue = mRoot->getRightSmallestValue();
-        mRoot->right->swivelTree(swivelValue);
-        mRoot->right->left = mRoot->left;
-        mRoot = mRoot->right;
+        mRoot = mRoot->right->swivelTree(swivelValue);
+        mRoot->left = deleteNode->left;
         delete deleteNode;
     }
     mCount -= 1;
@@ -105,7 +104,7 @@ size_t Set::remove(const std::string& value) {
 }
 
 bool Set::swivel(const std::string& value) {
-    if(isNullNode(mRoot)) { return false; }
+    if(mRoot == NULL) { return false; }
     if(contains(value)) { 
         mRoot = mRoot->swivelTree(value);
         return true;
