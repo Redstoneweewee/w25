@@ -21,9 +21,11 @@ _Assignments are due before midnight Pacific Time._
 
 | Name                    | Due
 |-------------------------|-----
-| [Welcome](labs/welcome) | January 14th
-| [TicTac](labs/tictac)   | January 22nd
-| [FibVec](labs/fibvec)   | January 28th
+| [Welcome](labs/welcome) | January  14th
+| [TicTac](labs/tictac)   | January  22nd
+| [FibVec](labs/fibvec)   | January  28th
+| [Assort](labs/assort)   | February  4th
+| [Swivel](labs/swivel)   | February 11th
 
 
 ## Lectures
@@ -39,6 +41,9 @@ _11:00 to 12:15 Mondays and Wednesdays in TD-W 1701_
 | January  20th | _Martin Luther King Day: No lecture!_
 | January  22nd | Exceptions; const member functions; vectors
 | January  27th | Big-O notation; _Quiz 1: Bring your ID and a pen/pencil!_
+| January  29th | More big-O notation; linked lists
+| February  3rd | Stacks and queues; amortized time
+| February  5th | Sorted sequences; binary search; binary search trees
 
 
 [piazza]: https://piazza.com/ucsb/winter2025/cs24
