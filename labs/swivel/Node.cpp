@@ -1,5 +1,23 @@
 #include "Node.h"
 
+Node::Node() {
+    left  = NULL;
+    right = NULL;
+}
+
+Node::Node(std::string data) {
+    this->data = data;
+    left  = NULL;
+    right = NULL;
+}
+
+Node::Node(std::string data, Node* left, Node* right) {
+    this->data  = data;
+    this->left  = NULL;
+    this->right = NULL;
+}
+
+
 size_t Node::removeTree() {
     size_t removeCount = 1;
     if(this->left != NULL) {

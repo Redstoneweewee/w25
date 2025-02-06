@@ -10,6 +10,10 @@ class Node {
     std::string data;
     Node* left;
     Node* right;
+    Node();
+    Node(std::string data);
+    Node(std::string data, Node* left, Node* right);
+
     size_t removeTree();
     bool   treeContains(std::string value) const;
 };
