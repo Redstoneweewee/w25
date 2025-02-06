@@ -97,7 +97,7 @@ Node* Node::swivelTree(std::string value) {
         else { return this; }
     }
     else if(value.compare(this->data) > 0) {
-        if(this->left != NULL) { 
+        if(this->right != NULL) { 
             swivelNode = this->right->swivelTree(value);
             direction = "right";
         }
@@ -117,4 +117,18 @@ Node* Node::swivelTree(std::string value) {
     }
 
     return swivelNode;
+}
+
+std::string Node::getRightSmallestValue() {
+    if(this->right == NULL) {
+        return this->data;
+    }
+    return this->right->getLeftSmallestValue();
+}
+
+std::string Node::getLeftSmallestValue() {
+    if(this->left == NULL) {
+        return this->data;
+    }
+    return this->left->getLeftSmallestValue();
 }

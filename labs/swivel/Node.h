@@ -18,6 +18,9 @@ class Node {
     size_t      insertIntoTree(std::string value);
     std::string treeToString();
     Node*       swivelTree(std::string value);
+    std::string getRightSmallestValue();
+   private:
+    std::string getLeftSmallestValue();
 };
 
 #endif

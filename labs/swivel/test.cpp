@@ -6,13 +6,17 @@
 
 int main() {
   Set set;
-  set.insert("tellurium");
-  set.insert("sulfur");
-  set.insert("selenium");
-  set.insert("polonium");
-  set.insert("oxygen");
-  set.clear();
-  set.insert("livermorium");
+  set.insert("r");
+  set.insert("a");
+  set.insert("t");
+  set.swivel("r");
   set.print();
+  set.swivel("a");
+  set.print();
+  set.swivel("r");
+  set.print();
+  set.swivel("g");
+  set.print();
+  std::cout << set.count();
   return 0;
 }
