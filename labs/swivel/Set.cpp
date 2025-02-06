@@ -23,7 +23,10 @@ Set::~Set() {
 
 
 size_t Set::clear() {
-    return 0;
+    size_t removeCount = 0;
+    if(mRoot != NULL) {
+        test();
+    }
 }
 
 bool Set::contains(const std::string& value) const {
@@ -52,4 +55,10 @@ size_t Set::remove(const std::string& value) {
 
 bool Set::swivel(const std::string& value) {
     return false;
+}
+
+
+
+void Set::test() {
+
 }
