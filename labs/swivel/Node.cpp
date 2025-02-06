@@ -81,3 +81,40 @@ std::string Node::treeToString() {
 
     return "("+leftString+" "+this->data+" "+rightString+")";
 }
+
+
+Node* Node::swivelTree(std::string value) {
+    Node* swivelNode;
+    std::string direction;
+    if(value.compare(this->data) == 0) {
+        return this;
+    }
+    else if(value.compare(this->data) < 0) {
+        if(this->left != NULL) { 
+            swivelNode = this->left->swivelTree(value);
+            direction = "left";
+        }
+        else { return this; }
+    }
+    else if(value.compare(this->data) > 0) {
+        if(this->left != NULL) { 
+            swivelNode = this->right->swivelTree(value);
+            direction = "right";
+        }
+        else { return this; }
+    }
+
+
+    if(direction == "left") {
+        Node* oldRight = swivelNode->right;
+        swivelNode->right = this;
+        this->left = oldRight;
+    }
+    else if(direction == "right") {
+        Node* oldLeft = swivelNode->left;
+        swivelNode->left = this;
+        this->right = oldLeft;
+    }
+
+    return swivelNode;
+}

@@ -33,6 +33,7 @@ size_t Set::clear() {
         removeCount += mRoot->removeTree();
         mRoot = NULL;
     }
+    mCount = 0;
     return removeCount;
 }
 
@@ -74,7 +75,15 @@ size_t Set::remove(const std::string& value) {
 }
 
 bool Set::swivel(const std::string& value) {
-    return false;
+    if(isNullNode(mRoot)) { return false; }
+    bool output;
+    size_t containsValue = contains(value);
+    if(containsValue == 1) { output = true; }
+    else { output = false; }
+
+    mRoot = mRoot->swivelTree(value);
+    
+    return output;
 }
 
 

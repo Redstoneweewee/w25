@@ -17,6 +17,7 @@ class Node {
     bool        treeContains(std::string value) const;
     size_t      insertIntoTree(std::string value);
     std::string treeToString();
+    Node*       swivelTree(std::string value);
 };
 
 #endif
