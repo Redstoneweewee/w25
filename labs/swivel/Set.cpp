@@ -31,10 +31,7 @@ size_t Set::clear() {
     size_t removeCount = 0;
     if(!isNullNode(mRoot)) {
         removeCount += mRoot->removeTree();
-    }
-    else {
-        delete mRoot;
-        removeCount++;
+        mRoot = NULL;
     }
     return removeCount;
 }

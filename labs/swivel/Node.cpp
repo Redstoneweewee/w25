@@ -1,5 +1,7 @@
 #include "Node.h"
 
+#include <iostream>
+
 Node::Node(std::string data) {
     this->data = data;
     left  = NULL;

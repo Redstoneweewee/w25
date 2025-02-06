@@ -11,6 +11,7 @@ int main() {
   set.insert("selenium");
   set.insert("polonium");
   set.insert("oxygen");
+  set.clear();
   set.insert("livermorium");
   set.print();
   return 0;
