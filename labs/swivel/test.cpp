@@ -14,7 +14,13 @@ int main() {
   set.insert("p");
   set.insert("t");
   set.print();
+  set.remove("r");
+  set.remove("e");
+  set.remove("y");
   set.remove("n");
+  set.remove("t");
+  set.remove("z");
+  set.remove("p");
   set.print();
   
   return 0;
