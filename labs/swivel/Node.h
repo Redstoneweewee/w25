@@ -16,6 +16,7 @@ class Node {
 
     size_t removeTree();
     bool   treeContains(std::string value) const;
+    size_t insertIntoTree(std::string value);
 };
 
 #endif

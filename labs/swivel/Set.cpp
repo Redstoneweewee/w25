@@ -27,8 +27,12 @@ Set::~Set() {
 
 size_t Set::clear() {
     size_t removeCount = 0;
-    if(isNullNode(mRoot)) {
+    if(!isNullNode(mRoot)) {
         removeCount += mRoot->removeTree();
+    }
+    else {
+        delete mRoot;
+        removeCount++;
     }
     return removeCount;
 }
@@ -49,8 +53,9 @@ void Set::debug() {
 size_t Set::insert(const std::string& value) {
     if(isNullNode(mRoot)) {
         mRoot = new Node(value);
+        return 1;
     }
-    return 0;
+    return mRoot->insertIntoTree(value);
 }
 
 void Set::print() const {

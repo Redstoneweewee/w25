@@ -45,3 +45,27 @@ bool Node::treeContains(std::string value) const {
     }
     else { return true; }
 }
+
+size_t Node::insertIntoTree(std::string value) {
+    if(value.compare(this->data) < 0) {
+        if(this->left != NULL) {
+            return this->left->insertIntoTree(value);
+        }
+        else {
+            this->left = new Node(value);
+            return 1;
+        }
+    }
+    else if(value.compare(this->data) > 0) {
+        if(this->right != NULL) {
+            return this->right->insertIntoTree(value);
+        }
+        else {
+            this->right = new Node(value);
+            return 1;
+        }
+    }
+    else {
+        return 0;
+    }
+}
