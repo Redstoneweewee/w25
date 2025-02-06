@@ -69,6 +69,9 @@ std::string Node::treeToString() {
     std::string leftString;
     std::string rightString;
 
+    if(this->left == NULL && this->right == NULL) {
+        return this->data;
+    }
     if(this->left != NULL) { leftString = this->left->treeToString(); }
     else { leftString = "-"; }
     if(this->right != NULL) { rightString = this->right->treeToString(); }

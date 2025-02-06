@@ -6,8 +6,12 @@
 
 int main() {
   Set set;
-
-  std::cout << "This program doesn't do anything interesting yet...\n";
-
+  set.insert("tellurium");
+  set.insert("sulfur");
+  set.insert("selenium");
+  set.insert("polonium");
+  set.insert("oxygen");
+  set.insert("livermorium");
+  set.print();
   return 0;
 }
