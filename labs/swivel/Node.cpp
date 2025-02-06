@@ -132,3 +132,17 @@ std::string Node::getLeftSmallestValue() {
     }
     return this->left->getLeftSmallestValue();
 }
+
+
+Node* Node::createCopy() {
+    Node* newNode = new Node(this->data);
+    if(this->left != NULL) {
+        newNode->left = this->left->createCopy();
+    }
+    else { newNode->left = NULL; }
+    if(this->right != NULL) {
+        newNode->right = this->right->createCopy();
+    }
+    else { newNode->right = NULL; }
+    return newNode;
+}

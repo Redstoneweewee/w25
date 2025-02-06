@@ -11,7 +11,13 @@ Set::Set() {
 }
 
 Set::Set(const Set& other) {
-
+    if(other.mRoot == NULL) {
+        Set();
+    }
+    else {
+        mRoot = other.mRoot->createCopy();
+        mCount = other.mCount;
+    }
 }
 
 Set::Set(Set&& other) {
@@ -71,8 +77,9 @@ void Set::print() const {
 }
 
 size_t Set::remove(const std::string& value) {
-    size_t output;
-    if(!swivel(value)) { output = 0; }
+    if(!swivel(value)) { 
+        return 0;
+    }
     Node* deleteNode = mRoot;
     if(mRoot->left == NULL && mRoot->right == NULL) {
         delete deleteNode;
@@ -93,24 +100,17 @@ size_t Set::remove(const std::string& value) {
         mRoot = mRoot->right;
         delete deleteNode;
     }
-    output = 1;
-    mCount -= output;
-    return output;
+    mCount -= 1;
+    return 1;
 }
 
 bool Set::swivel(const std::string& value) {
     if(isNullNode(mRoot)) { return false; }
-    bool output;
-    size_t containsValue = contains(value);
-    if(containsValue == 1) { output = true; }
-    else { 
-        output = false; 
-        return output;
+    if(contains(value)) { 
+        mRoot = mRoot->swivelTree(value);
+        return true;
     }
-
-    mRoot = mRoot->swivelTree(value);
-    
-    return output;
+    return false;
 }
 
 

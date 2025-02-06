@@ -9,14 +9,18 @@ int main() {
   set.insert("r");
   set.insert("a");
   set.insert("t");
-  set.swivel("r");
+  set.insert("d");
+  set.insert("v");
+  set.insert("e");
   set.print();
   set.swivel("a");
   set.print();
-  set.swivel("r");
+
+  Set set2(set);
+  set2.print();
+  set.clear();
+  
   set.print();
-  set.swivel("g");
-  set.print();
-  std::cout << set.count();
+  set2.print();
   return 0;
 }

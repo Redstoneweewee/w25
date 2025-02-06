@@ -19,6 +19,7 @@ class Node {
     std::string treeToString();
     Node*       swivelTree(std::string value);
     std::string getRightSmallestValue();
+    Node*       createCopy();
    private:
     std::string getLeftSmallestValue();
 };
