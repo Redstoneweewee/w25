@@ -35,10 +35,11 @@ public:
   Person*            father();
 
   // Required Relationship Functions
+  std::set<Person*> children();
+  
   std::set<Person*> ancestors(PMod pmod = PMod::ANY);
   std::set<Person*> aunts(PMod pmod = PMod::ANY, SMod smod = SMod::ANY);
   std::set<Person*> brothers(PMod pmod = PMod::ANY, SMod smod = SMod::ANY);
-  std::set<Person*> children();
   std::set<Person*> cousins(PMod pmod = PMod::ANY, SMod smod = SMod::ANY);
   std::set<Person*> daughters();
   std::set<Person*> descendants();

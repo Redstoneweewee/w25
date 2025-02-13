@@ -28,4 +28,4 @@ Query.o: Query.cpp Query.h GenePool.h Person.h Enums.h
 
 
 clean:
-	del -f genepool main.o GenePool.o Person.o Query.o
+	del -f *.exe *.o
