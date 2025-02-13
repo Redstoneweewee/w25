@@ -17,6 +17,8 @@ class Person {
   Gender mGender;
   Person* mMother;
   Person* mFather;
+  std::set<Person*> mChildren;
+
   // Helper Functions
 
 public:

@@ -19,7 +19,7 @@ const std::string& Person::name() const { return mName; }
 Gender Person::gender() const { return mGender; }
 Person* Person::mother() { return mMother; }
 Person* Person::father() { return mFather; }
-
+std::set<Person*> Person::children() { return mChildren; }
 
 //Relationship functions
 std::set<Person*> Person::ancestors(PMod pmod) {
@@ -33,11 +33,6 @@ std::set<Person*> Person::aunts(PMod pmod, SMod smod) {
     
 }
 std::set<Person*> Person::brothers(PMod pmod, SMod smod) {
-    std::set<Person*> people;
-    return people;
-    
-}
-std::set<Person*> Person::children() {
     std::set<Person*> people;
     return people;
     
