@@ -28,8 +28,28 @@ void Person::addChild(Person* child) {
 }
 
 //Relationship functions
+std::set<Person*> Person::getThisAndAllAncestors() {
+    std::set<Person*> people;
+    people.insert(this);
+    if(mMother != NULL) { people.merge(this->mMother->getThisAndAllAncestors()); }
+    if(mFather != NULL) { people.merge(this->mFather->getThisAndAllAncestors()); }
+    return people;
+}
+
 std::set<Person*> Person::ancestors(PMod pmod) {
     std::set<Person*> people;
+    if(pmod == PMod::MATERNAL && mMother != NULL) {
+        people = this->mMother->getThisAndAllAncestors();
+    }
+    else if(pmod == PMod::PATERNAL && mFather != NULL) {
+        people = this->mFather->getThisAndAllAncestors();
+    }
+    else if(mMother != NULL && mFather != NULL) {
+        std::set<Person*> motherSide = this->mMother->getThisAndAllAncestors();
+        std::set<Person*> fatherSide = this->mFather->getThisAndAllAncestors();
+        motherSide.merge(fatherSide);
+        people = motherSide;
+    }
     return people;
 
 }

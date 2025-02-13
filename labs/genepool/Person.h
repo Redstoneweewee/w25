@@ -20,6 +20,7 @@ class Person {
   std::set<Person*> mChildren;
 
   // Helper Functions
+  std::set<Person*> getThisAndAllAncestors();
 
 public:
   // Constructor
