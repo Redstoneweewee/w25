@@ -21,6 +21,12 @@ Person* Person::mother() { return mMother; }
 Person* Person::father() { return mFather; }
 std::set<Person*> Person::children() { return mChildren; }
 
+
+//Add child function
+void Person::addChild(Person* child) {
+    mChildren.insert(child);
+}
+
 //Relationship functions
 std::set<Person*> Person::ancestors(PMod pmod) {
     std::set<Person*> people;

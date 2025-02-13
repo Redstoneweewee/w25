@@ -27,17 +27,15 @@ GenePool::GenePool(std::istream& stream) {
         Gender gender = Gender::MALE;
         Person* mother = NULL;
         Person* father = NULL;
-        if(attributes[2] != "???") {
-            mother = mEveryone[attributes[2]];
-        }
-        if(attributes[3] != "???") {
-            father = mEveryone[attributes[3]];
-        }
+        if(attributes[1] == "female") { gender = Gender::FEMALE; }
+        if(attributes[2] != "???") { mother = mEveryone[attributes[2]]; }
+        if(attributes[3] != "???") { father = mEveryone[attributes[3]]; }
 
-        if(attributes[1] == "female") {
-            gender = Gender::FEMALE;
-        }
         Person* person = new Person(attributes[0], gender, mother, father);
+        
+        if(attributes[2] != "???") { mEveryone[attributes[2]]->addChild(person); }
+        if(attributes[3] != "???") { mEveryone[attributes[3]]->addChild(person); }
+
         mEveryone[attributes[0]] = person;
         //std::cout << "added person: name: " << attributes[0] << ", gender: " << attributes[1] << ", mother: " << attributes[2] << ", father: " << attributes[3] << std::endl;
     }

@@ -36,7 +36,7 @@ public:
 
   // Required Relationship Functions
   std::set<Person*> children();
-  
+
   std::set<Person*> ancestors(PMod pmod = PMod::ANY);
   std::set<Person*> aunts(PMod pmod = PMod::ANY, SMod smod = SMod::ANY);
   std::set<Person*> brothers(PMod pmod = PMod::ANY, SMod smod = SMod::ANY);
@@ -58,6 +58,7 @@ public:
   std::set<Person*> uncles(PMod pmod = PMod::ANY, SMod smod = SMod::ANY);
 
   // Other Member Functions
+  void addChild(Person* child);
 };
 
 #endif
