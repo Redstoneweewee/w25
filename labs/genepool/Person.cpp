@@ -90,7 +90,9 @@ std::set<Person*> Person::ancestors(PMod pmod) {
     return people;
 }
 std::set<Person*> Person::descendants() {
-    return this->getThisAndAllChildren();
+    std::set<Person*> allDescendents = this->getThisAndAllChildren();
+    allDescendents.erase(this);
+    return allDescendents;
 }
 std::set<Person*> Person::sons() {
     return this->getPeopleAtLevel(-1, Gender::MALE);
@@ -110,16 +112,31 @@ std::set<Person*> Person::granddaughters() {
 
 
 std::set<Person*> Person::parents(PMod pmod) {
-    return this->getPeopleAtLevel(1, Gender::ANY);
+    std::set<Person*> people;
+    return this->getPeopleAtLevel(1, pModToGender(pmod));
 }
 std::set<Person*> Person::grandparents(PMod pmod) {
-    return this->getPeopleAtLevel(2, Gender::ANY);
+    std::set<Person*> people = this->grandfathers(pmod);
+    people.merge(this->grandmothers(pmod));
+    return people;
 }
 std::set<Person*> Person::grandfathers(PMod pmod) {
-    return this->getPeopleAtLevel(2, Gender::MALE);
+    std::set<Person*> people;
+    std::set<Person*> parents;
+    parents = this->getPeopleAtLevel(1, pModToGender(pmod));
+    for(Person* parent : parents) {
+        people.merge(parent->getPeopleAtLevel(1, Gender::MALE));
+    }
+    return people;
 }
 std::set<Person*> Person::grandmothers(PMod pmod) {
-    return this->getPeopleAtLevel(2, Gender::FEMALE);
+    std::set<Person*> people;
+    std::set<Person*> parents;
+    parents = this->getPeopleAtLevel(1, pModToGender(pmod));
+    for(Person* parent : parents) {
+        people.merge(parent->getPeopleAtLevel(1, Gender::FEMALE));
+    }
+    return people;
 }
 
 
