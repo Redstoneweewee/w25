@@ -21,6 +21,10 @@ class Person {
 
   // Helper Functions
   std::set<Person*> getThisAndAllAncestors();
+  std::set<Person*> getThisAndAllChildren();
+  std::set<Person*> getPeopleAtLevel(int level, Gender gender, Person* initialPerson = NULL, SMod smod = SMod::ANY);
+  Gender pModToGender(PMod pmod);
+  bool isValidSMod(Person* person1, Person* person2, SMod smod);
 
 public:
   // Constructor
