@@ -89,28 +89,34 @@ void Heap::push(const std::string& value, float score) {
 }
 
 const Heap::Entry& Heap::top() const {
+    if(mCount == 0) {
+        throw std::underflow_error("Tried to use top on an empty heap.");
+    }
     return *mData;
 }
 
 
 void percolate(Heap::Entry* array, size_t size, size_t index, PDir direction) {
     if(direction == PDir::UP) {
-        while(index != 0 && array[index].score > array[(index-1)/2].score) {
+        while(index != 0 && array[index].score < array[(index-1)/2].score) {
             swap(array[index], array[(index-1)/2]);
             index = (index-1)/2;
         }
     }
     else {
         while(true) { //hack
-            if(index*2+1 < size && array[index].score < array[index*2+1].score) {
-                swap(array[index], array[index*2+1]);
-                index = index*2+1;
-            }
-            else if(index*2+2 < size && array[index].score < array[index*2+2].score) {
-                swap(array[index], array[index*2+2]);
-                index = index*2+2;
-            }
+            Heap::Entry* left  = index*2+1 < size ? array+(index*2+1) : NULL;
+            Heap::Entry* right = index*2+2 < size ? array+(index*2+2) : NULL;
+            size_t smallerIndex;
+            if(left == NULL && right == NULL) { return; }
+            else if(left == NULL  && array[index].score > right->score) { smallerIndex = index*2+2; }
+            else if(right == NULL && array[index].score > left->score)  { smallerIndex = index*2+1; }
+            else if(left != NULL && right != NULL && left->score <= right->score && array[index].score > left->score)  { smallerIndex = index*2+1; }
+            else if(left != NULL && right != NULL && left->score >  right->score && array[index].score > right->score) { smallerIndex = index*2+2; }
             else { return; }
+
+            swap(array[index], array[smallerIndex]);
+            index = smallerIndex;
         }
     }
 }
