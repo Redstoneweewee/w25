@@ -1,4 +1,4 @@
-all: heap point wordList test
+all: heap point wordList main
 
 heap:
 	g++ -c Heap.cpp -std=c++17 -g -Wall -Wextra -Werror -Wno-unused-parameter
