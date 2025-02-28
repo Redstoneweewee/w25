@@ -1,5 +1,6 @@
 #include "Counter.h"
 #include "List.h"
+#include <iostream>
 
 // Counter Member Functions
 
@@ -11,7 +12,6 @@ Counter::Counter() {
 
 Counter::~Counter() {
     if(mList != NULL) { 
-        mList->~List(); 
         delete mList;
     }
 }
@@ -22,6 +22,7 @@ size_t Counter::count() const {
 }
 int Counter::total() const {
     int total = 0;
+    if(mList->head() == NULL) { return total; } 
     for(auto itr = this->begin(); itr != this->end(); ++itr) {
         total += itr.value();
     }
@@ -30,8 +31,8 @@ int Counter::total() const {
 
 void Counter::inc(const std::string& key, int by) {
     Node* node = mList->find(key);
-    if(node == NULL) { insertNewNode(key, by); }
-    else { node->mValue += by; }
+    if(node == NULL) { insertNewNode(key, by); std::cout << "new node\n";}
+    else { node->mValue += by; std::cout << "increased by " << by << "\n";}
 }
 void Counter::dec(const std::string& key, int by) {
     Node* node = mList->find(key);
@@ -60,7 +61,7 @@ Counter::Iterator Counter::begin() const {
     return Iterator(mList->head());
 }
 Counter::Iterator Counter::end() const {
-    return Iterator(mList->head()->previous);
+    return Iterator(NULL);
 }
 
 //Helper functions

@@ -23,6 +23,11 @@ Node* List::head() {
     return mHead;
 }
 
+Node* List::tail() {
+    if(mHead != NULL) { return mHead->previous; }
+    return NULL;
+}
+
 void List::insertAtTail(Node* node) {
     if(mHead != NULL) {
         Node* oldTail = mHead->previous;
@@ -52,7 +57,12 @@ Node* List::find(std::string key) {
 void List::remove(std::string key) {
     Node* removeNode = find(key);
     if(removeNode == NULL) { return; }
-
+    if(removeNode == mHead && mHead->next == mHead) {
+        mHead = NULL;
+    }
+    else if(removeNode == mHead) {
+        mHead = mHead->next;
+    }
     removeNode->previous->next = removeNode->next;
     removeNode->next->previous = removeNode->previous;
     delete removeNode;

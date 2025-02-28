@@ -12,6 +12,7 @@ class Counter {
 public:
   class Iterator {
     // Member Variables
+    Node* mStartNode;
     Node* mNode;
 
   public:

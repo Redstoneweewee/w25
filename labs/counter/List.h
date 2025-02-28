@@ -11,6 +11,11 @@ struct Node {
     Node* next;
     Node* previous;
 
+    ~Node() {
+        next = NULL;
+        previous = NULL;
+    }
+
     Node() {
         next = NULL;
         previous = NULL;
@@ -32,6 +37,7 @@ class List {
     ~List();
 
     Node* head();
+    Node* tail();
     void insertAtTail(Node* node);
     /**
      * Returns a pointer to the node with key. If not found, returns NULL.
