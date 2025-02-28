@@ -31,8 +31,8 @@ int Counter::total() const {
 
 void Counter::inc(const std::string& key, int by) {
     Node* node = mList->find(key);
-    if(node == NULL) { insertNewNode(key, by); std::cout << "new node\n";}
-    else { node->mValue += by; std::cout << "increased by " << by << "\n";}
+    if(node == NULL) { insertNewNode(key, by); }
+    else { node->mValue += by; }
 }
 void Counter::dec(const std::string& key, int by) {
     Node* node = mList->find(key);
