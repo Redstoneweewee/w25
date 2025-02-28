@@ -1,4 +1,4 @@
-all: List Counter Iterator Index main
+all: List Counter Iterator Index wordCount
 
 List: List.cpp List.h
 	g++ -c List.cpp -std=c++17 -g -Wall -Wextra -Werror -Wno-unused-parameter
@@ -24,6 +24,12 @@ test: test.cpp
 main: main.cpp
 	g++ -c main.cpp -std=c++17 -g -Wall -Wextra -Werror -Wno-unused-parameter
 	g++ List.o Counter.o Iterator.o Index.o main.o -o main -std=c++17 -g -Wall -Wextra -Werror -Wno-unused-parameter
+	del -f *o
+
+
+wordCount: word-count.cpp
+	g++ -c word-count.cpp -std=c++17 -g -Wall -Wextra -Werror -Wno-unused-parameter
+	g++ List.o Counter.o Iterator.o Index.o word-count.o -o main -std=c++17 -g -Wall -Wextra -Werror -Wno-unused-parameter
 	del -f *o
 
 clean:

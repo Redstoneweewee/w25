@@ -17,11 +17,11 @@ size_t Index::count() const {
 }
 
 size_t Index::hash(const std::string& string) const {
-    size_t output = 0;
-    for(char c : string) {
-        output += c;
+    size_t hash = 5381; // FNV-1a base
+    for (char c : string) {
+        hash = ((hash << 5) + hash) + c; // FNV-1a hash
     }
-    return output;
+    return hash;
 }
 
 void Index::insert(Node* node) {
