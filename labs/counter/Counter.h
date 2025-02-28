@@ -12,8 +12,10 @@ class Counter {
 public:
   class Iterator {
     // Member Variables
+    Node* mNode;
 
   public:
+    Iterator(Node* startNode);
     const std::string& key() const;
     int value() const;
 
@@ -24,7 +26,7 @@ public:
 
 private:
   // Member Variables
-    List mList;
+    List* mList;
     size_t mCount;
     size_t mCapacity;
 

@@ -1,4 +1,5 @@
 #include "Counter.h"
+#include "List.h"
 
 // Counter Member Functions
 
@@ -7,14 +8,18 @@ Counter::Counter() {
     mCapacity = 0;
 }
 
-Counter::~Counter() {}
+Counter::~Counter() {
+    mList->~List();
+    delete mList;
+}
 
 
 size_t Counter::count() const {
     return mCount;
 }
 int Counter::total() const {
-    return mCount;
+    //finish later
+    return 0;
 }
 
 void Counter::inc(const std::string& key, int by) {
@@ -34,8 +39,8 @@ void Counter::set(const std::string& key, int count) {
 }
 
 Counter::Iterator Counter::begin() const {
-    return Iterator();
+    return Iterator(mList->head());
 }
 Counter::Iterator Counter::end() const {
-    return Iterator();
+    return Iterator(mList->head()->previous);
 }
