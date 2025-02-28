@@ -92,5 +92,6 @@ void Index::remove(const std::string& key) {
     const long long int index = probeKey(hash(key) % mCapacity, key);
     if(index == -1) { return; }
     mTable[index].node = NULL;
+    mTable[index].isDirty = false;
     mCount--;
 }
