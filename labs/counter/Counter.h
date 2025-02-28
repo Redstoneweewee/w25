@@ -1,6 +1,7 @@
 #ifndef COUNTER_H
 #define COUNTER_H
 
+#include "List.h"
 #include <cstddef>
 #include <string>
 
@@ -11,7 +12,6 @@ class Counter {
 public:
   class Iterator {
     // Member Variables
-    //Node* mNode;
 
   public:
     const std::string& key() const;
@@ -24,6 +24,9 @@ public:
 
 private:
   // Member Variables
+    List mList;
+    size_t mCount;
+    size_t mCapacity;
 
 private:
   // Helper Functions
