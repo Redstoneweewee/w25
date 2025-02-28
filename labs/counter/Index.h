@@ -3,7 +3,7 @@
 
 #include "List.h"
 
-const size_t initialSize = 1; //2^16
+const size_t initialSize = 65536; //2^16
 // TODO...
 
 
