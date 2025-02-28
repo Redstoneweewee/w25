@@ -1,6 +1,7 @@
 #include "Counter.h"
 
 Counter::Iterator::Iterator(Node* startNode) {
+    mStartNode = startNode;
     mNode = startNode;
 }
 
@@ -14,6 +15,9 @@ int Counter::Iterator::value() const {
 
 void Counter::Iterator::operator ++ () {
     mNode = mNode->next;
+    if(mNode == mStartNode) {
+        mNode = NULL;
+    }
 }
 bool Counter::Iterator::operator == (const Iterator& other) const {
     return mNode == other.mNode;

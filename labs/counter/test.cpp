@@ -14,11 +14,11 @@ int main() {
     testList.insertAtTail(new Node("g", 7));
     testList.insertAtTail(new Node("h", 8));
     testList.printAll();
-    testList.remove("d");
+    testList.remove("a");
     std::cout << std::endl;
     testList.printAll();
-    testList.remove("b");
-    testList.insertAtTail(new Node("b", 2));
+    testList.remove("h");
+    testList.insertAtTail(new Node("v", 15));
     std::cout << std::endl;
     testList.printAll();
     return 0;
