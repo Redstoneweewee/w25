@@ -4,7 +4,6 @@
 // List Member Functions
 List::List() {
     mHead = NULL;
-    mCount = 0;
 }
 
 List::~List() {
@@ -22,10 +21,6 @@ List::~List() {
 
 Node* List::head() {
     return mHead;
-}
-
-size_t List::count() {
-    return mCount;
 }
 
 void List::insertAtTail(Node* node) {

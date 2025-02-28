@@ -32,6 +32,7 @@ private:
 
 private:
   // Helper Functions
+  void insertNewNode(const std::string& key, int value);
 
 public:
   Counter();

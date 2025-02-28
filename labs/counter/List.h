@@ -26,14 +26,12 @@ struct Node {
 class List {
   private:
     Node* mHead;
-    size_t mCount;
 
   public:
     List();
     ~List();
 
     Node* head();
-    size_t count();
     void insertAtTail(Node* node);
     /**
      * Returns a pointer to the node with key. If not found, returns NULL.
