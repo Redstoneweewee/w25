@@ -33,7 +33,7 @@ private:
 
 private:
   // Helper Functions
-  void insertNewNode(const std::string& key, int value);
+  void insertNewNode(const std::string& key, const int value) const;
 
 public:
   Counter();
@@ -42,11 +42,11 @@ public:
   size_t count() const;
   int    total() const;
 
-  void inc(const std::string& key, int by = 1);
-  void dec(const std::string& key, int by = 1);
+  void inc(const std::string& key, const int by = 1);
+  void dec(const std::string& key, const int by = 1);
   void del(const std::string& key);
   int  get(const std::string& key) const;
-  void set(const std::string& key, int count);
+  void set(const std::string& key, const int count) const;
 
   Iterator begin() const;
   Iterator end() const;

@@ -36,31 +36,24 @@ void Index::insert(Node* node) {
 
 
 size_t Index::probeEmpty(size_t index, size_t n) const {
-    if(index >= mCapacity) {
-        index = index % mCapacity;
-    }
     if(mTable[index].node == NULL) {
         return index;
     }
-    return probeEmpty(index+n, n+1);
+    return probeEmpty((index + n*n) % mCapacity, n+1);
 }
 
 long long int Index::probeKey(size_t index, const std::string& key, size_t n) const {
-    
-    if(index >= mCapacity) {
-        index = index % mCapacity;
-    }
 
     if(mTable[index].node != NULL) {
         if(mTable[index].node->mKey == key) {
             return index;
         }
         else {
-            return probeKey(index+n, key, n+1);
+            return probeKey((index + n*n) % mCapacity, key, n+1);
         }
     }
     else if(mTable[index].isDirty) {
-        return probeKey(index+n, key, n+1);
+        return probeKey((index + n*n) % mCapacity, key, n+1);
     }
     return -1;
 }

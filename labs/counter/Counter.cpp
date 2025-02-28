@@ -27,12 +27,12 @@ int Counter::total() const {
     return total;
 }
 
-void Counter::inc(const std::string& key, int by) {
+void Counter::inc(const std::string& key, const int by) {
     Node* node = mIndex->find(key);
     if(node != NULL) { node->mValue += by; }
     else { insertNewNode(key, by); }
 }
-void Counter::dec(const std::string& key, int by) {
+void Counter::dec(const std::string& key, const int by) {
     Node* node = mIndex->find(key);
     if(node != NULL) { node->mValue -= by; }
     else { insertNewNode(key, -by); }
@@ -49,7 +49,7 @@ int Counter::get(const std::string& key) const {
     if(node != NULL) { return node->mValue; }
     else { return 0; }
 }
-void Counter::set(const std::string& key, int count) {
+void Counter::set(const std::string& key, const int count) const {
     Node* node = mIndex->find(key);
     if(node != NULL) { node->mValue = count; }
     else { insertNewNode(key, count); }
@@ -64,7 +64,7 @@ Counter::Iterator Counter::end() const {
 }
 
 //Helper functions
-void Counter::insertNewNode(const std::string& key, int value) {
+void Counter::insertNewNode(const std::string& key, const int value) const {
     Node* node = new Node(key, value);
     mList->insertAtTail(node);
     mIndex->insert(node);
