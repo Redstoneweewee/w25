@@ -4,8 +4,8 @@
 #include <string>
 
 // TODO...
-
 struct Node {
+    long long int mHashNum = -1;
     std::string mKey;
     int mValue;
     Node* next;
@@ -26,6 +26,9 @@ struct Node {
         next = NULL;
         previous = NULL;
     }
+    void setHashNum(size_t hashNum) {
+        mHashNum = hashNum;
+    }
 };
 
 class List {
@@ -43,7 +46,7 @@ class List {
      * Returns a pointer to the node with key. If not found, returns NULL.
      */
     Node* find(std::string key);
-    void remove(std::string key);
+    void remove(Node* removeNode);
     void printAll();
 };
 

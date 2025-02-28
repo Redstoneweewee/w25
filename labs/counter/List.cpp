@@ -54,8 +54,7 @@ Node* List::find(std::string key) {
     return NULL;
 }
 
-void List::remove(std::string key) {
-    Node* removeNode = find(key);
+void List::remove(Node* removeNode) {
     if(removeNode == NULL) { return; }
     if(removeNode == mHead && mHead->next == mHead) {
         mHead = NULL;

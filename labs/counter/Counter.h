@@ -2,6 +2,7 @@
 #define COUNTER_H
 
 #include "List.h"
+#include "Index.h"
 #include <cstddef>
 #include <string>
 
@@ -27,9 +28,8 @@ public:
 
 private:
   // Member Variables
-    List* mList;
-    size_t mCount;
-    size_t mCapacity;
+  Index* mIndex;
+  List* mList;
 
 private:
   // Helper Functions
