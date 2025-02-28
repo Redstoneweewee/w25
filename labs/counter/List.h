@@ -5,6 +5,24 @@
 
 // TODO...
 
+struct Node {
+    std::string mKey;
+    int mValue;
+    Node* next;
+    Node* previous;
+
+    Node() {
+        next = NULL;
+        previous = NULL;
+    }
+    Node(std::string key, int value) {
+        mKey = key;
+        mValue = value;
+        next = NULL;
+        previous = NULL;
+    }
+};
+
 class List {
   private:
     Node* mHead;
@@ -22,13 +40,7 @@ class List {
      */
     Node* find(std::string key);
     void remove(std::string key);
-};
-
-struct Node {
-    std::string mKey;
-    int mValue;
-    Node* next;
-    Node* previous;
+    void printAll();
 };
 
 #endif

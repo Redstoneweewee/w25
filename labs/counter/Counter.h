@@ -11,6 +11,7 @@ class Counter {
 public:
   class Iterator {
     // Member Variables
+    //Node* mNode;
 
   public:
     const std::string& key() const;

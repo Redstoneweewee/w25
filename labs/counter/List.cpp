@@ -1,4 +1,5 @@
 #include "List.h"
+#include <iostream>
 
 // List Member Functions
 List::List() {
@@ -29,9 +30,11 @@ size_t List::count() {
 
 void List::insertAtTail(Node* node) {
     if(mHead != NULL) {
+        Node* oldTail = mHead->previous;
         mHead->previous->next = node;
-        node->next = mHead;
         mHead->previous = node;
+        node->next = mHead;
+        node->previous = oldTail;
     }
     else {
         mHead = node;
@@ -58,4 +61,17 @@ void List::remove(std::string key) {
     removeNode->previous->next = removeNode->next;
     removeNode->next->previous = removeNode->previous;
     delete removeNode;
+}
+
+
+void List::printAll() {
+    if(mHead == NULL) { return; }
+    size_t i = 0;
+    std::cout << "obj at " << i << ": key=" << mHead->mKey << ", value=" << mHead->mValue << "\n";
+    Node* nextNode = mHead->next;
+    while(nextNode != mHead) {
+        i++;
+        std::cout << "obj at " << i << ": key=" << nextNode->mKey << ", value=" << nextNode->mValue << "\n";
+        nextNode = nextNode->next;
+    }
 }
