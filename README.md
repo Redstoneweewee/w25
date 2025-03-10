@@ -19,11 +19,17 @@ assignment, do that on [Gradescope][gradescope].
 
 _Assignments are due before midnight Pacific Time._
 
-| Name                    | Due
-|-------------------------|-----
-| [Welcome](labs/welcome) | January 14th
-| [TicTac](labs/tictac)   | January 22nd
-| [FibVec](labs/fibvec)   | January 28th
+| Name                      | Due
+|---------------------------|-----
+| [Welcome](labs/welcome)   | January  14th
+| [TicTac](labs/tictac)     | January  22nd
+| [FibVec](labs/fibvec)     | January  28th
+| [Assort](labs/assort)     | February  4th
+| [Swivel](labs/swivel)     | February 11th
+| [GenePool](labs/genepool) | February 18th
+| [Typo](labs/typo)         | February 25th
+| [Counter](labs/counter)   | March     7th
+| [Bomber](labs/bomber)     | March    21st
 
 
 ## Lectures
@@ -39,6 +45,18 @@ _11:00 to 12:15 Mondays and Wednesdays in TD-W 1701_
 | January  20th | _Martin Luther King Day: No lecture!_
 | January  22nd | Exceptions; const member functions; vectors
 | January  27th | Big-O notation; _Quiz 1: Bring your ID and a pen/pencil!_
+| January  29th | More big-O notation; linked lists
+| February  3rd | Stacks and queues; amortized time
+| February  5th | Sorted sequences; sets; binary search; binary search trees
+| February 10th | Move constructors; self-balancing trees; AVL trees; splay trees
+| February 12th | Maps; tree traversals; abstract syntax trees; red-black trees
+| February 17th | _Presidents' Day: No lecture!_
+| February 19th | Binary heaps; leftist heaps
+| February 24th | Binomial heaps; _Quiz 2_
+| February 26th | Hash tables; probing vs chaining
+| March     3rd | Iterators; disjoint sets
+| March     5th | Introduction to graphs; graph traversals
+| March    10th | TBD; _Quiz 3_
 
 
 [piazza]: https://piazza.com/ucsb/winter2025/cs24
