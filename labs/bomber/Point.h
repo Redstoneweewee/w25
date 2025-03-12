@@ -4,21 +4,21 @@
 #include <iostream>
 
 struct Point {
-  int lat;  // Latitude
-  int lng;  // Longitude
+  int x;  // Latitude
+  int y;  // Longitude
 
   Point() {
     // Beware of junk values!
   }
 
-  Point(int lat, int lng) {
-    this->lat = lat;
-    this->lng = lng;
+  Point(int x, int y) {
+    this->x = x;
+    this->y = y;
   }
 
   Point(const Point& other) {
-    this->lat = other.lat;
-    this->lng = other.lng;
+    this->x = other.x;
+    this->y = other.y;
   }
 };
 
