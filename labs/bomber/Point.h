@@ -20,6 +20,8 @@ struct Point {
     this->x = other.x;
     this->y = other.y;
   }
+  
+  Point& operator=(const Point& other);
 };
 
 // Operators for easier (and consistent) input and output:
