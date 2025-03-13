@@ -18,7 +18,10 @@ public:
         }
     }
 
-    // Find with path compression
+    /**
+     * Find with path compression
+     * If not in the set, returns NULL
+     */
     Tile* find(Tile* tile) {
         if (parent.find(tile) == parent.end()) {
             return NULL;

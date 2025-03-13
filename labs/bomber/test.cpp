@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
 
   map.printMap();
   map.printPerimeter();
+  map.printRegions();
 
   return 0;
 }

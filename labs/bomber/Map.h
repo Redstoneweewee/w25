@@ -29,11 +29,13 @@ public:
     std::string route(Point src, Point dst);
     void printMap() const;
     void printPerimeter() const;
+    void printRegions();
 
 private:
     void initializeCharMap(std::istream& stream);
     void initializeTileMap();
     void initializeRegionalDisjointSet();
+    void createRegionFromTile(Tile* tile);
 
     void initializeAndSetNeighbors(Tile* tile);
     bool isPointValid(const Point& p) const;

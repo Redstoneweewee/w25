@@ -9,10 +9,10 @@ struct Tile {
     Point point;
     bool isPerimeter = false;
     /**
-     * neighbors[0] = top neighbor
-     * neighbors[1] = right neighbor
-     * neighbors[2] = bottom neighbor
-     * neighbors[3] = left neighbor
+     * neighbors[0] = left neighbor
+     * neighbors[2] = top neighbor
+     * neighbors[3] = right neighbor
+     * neighbors[4] = bottom neighbor
      * NULL = edge of map
      */
     Tile* neighbors[4] = {NULL};

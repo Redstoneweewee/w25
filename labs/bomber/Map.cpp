@@ -29,6 +29,32 @@ std::string Map::route(Point src, Point dst) {
     return "";
 }
 
+void Map::printRegions() {
+    std::unordered_map<Tile*, char> allParents;
+    char startingChar = 'A';
+    for(vector<Tile*> row : tileMap) {
+        for(Tile* tile : row) {
+            Tile* parent = regionalDisjointSet.find(tile);
+            if(parent != NULL && allParents.find(parent) == allParents.end()) {
+                allParents.insert({parent, startingChar});
+                startingChar++;
+            }
+        }
+    }
+    for(vector<Tile*> row : tileMap) {
+        for(Tile* tile : row) {
+            auto it = allParents.find(regionalDisjointSet.find(tile));
+            if(it != allParents.end()) {
+                std::cout << it->second;
+            }
+            else {
+                std::cout << " ";
+            }
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n";
+}
 void Map::printPerimeter() const {
     for(vector<Tile*> row : tileMap) {
         for(Tile* tile : row) {
@@ -36,6 +62,7 @@ void Map::printPerimeter() const {
         }
         std::cout << "\n";
     }
+    std::cout << "\n";
 }
 void Map::printMap() const {
     for(vector<Tile*> row : tileMap) {
@@ -44,6 +71,7 @@ void Map::printMap() const {
         }
         std::cout << "\n";
     }
+    std::cout << "\n";
 }
 /*
 void Map::printMap() const {
@@ -99,10 +127,6 @@ void Map::initializeTileMap() {
 
 /**
  * must be done after the tile has been initialized
- * returns the right and bottom neighbors [1, 2]
- * 
- * we only care about right and bottom neighbors cuz 
- * we are initializing them from top left to bottom right
  */
 void Map::initializeAndSetNeighbors(Tile* tile) {
     tileMap[tile->point.y][tile->point.x] = tile;
@@ -131,7 +155,20 @@ void Map::initializeAndSetNeighbors(Tile* tile) {
 void Map::initializeRegionalDisjointSet() {
     for(vector<Tile*> row : tileMap) {
         for(Tile* tile : row) {
-            regionalDisjointSet.add(tile);
+            if(tile->type == '.' || tile->type == '*') {
+                createRegionFromTile(tile);
+            }
+        }
+    }
+}
+
+void Map::createRegionFromTile(Tile* tile) {
+    regionalDisjointSet.add(tile);
+    for(size_t i=0; i<4; i++) {
+        if(tile->neighbors[i] != NULL && regionalDisjointSet.find(tile->neighbors[i]) != NULL && 
+          (tile->neighbors[i]->type == '.' || tile->neighbors[i]->type == '*')) {
+            regionalDisjointSet.unite(tile, tile->neighbors[i]);
+            std::cout << "united " << tile->point << " with " << tile->neighbors[i]->point << "\n";
         }
     }
 }
@@ -158,17 +195,17 @@ bool Map::isPointReachable(Point& p, bool isStartingPoint) const {
 
 /**
  * Returns an array of size 4
- * [0] = top neighbor pt
- * [1] = right neighbor pt
- * [2] = bottom neighbor pt
- * [3] = left neighbor pt
+ * [0] = left neighbor pt
+ * [1] = top neighbor pt
+ * [2] = right neighbor pt
+ * [3] = bottom neighbor pt
  */
 std::array<Point, 4> Map::calculateNeighborPoints(const Point& p) {
     return {
+        Point(p.x-1, p.y),
         Point(p.x, p.y-1),
         Point(p.x+1, p.y),
-        Point(p.x, p.y+1),
-        Point(p.x-1, p.y)
+        Point(p.x, p.y+1)
     };
 }
 
