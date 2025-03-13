@@ -2,19 +2,23 @@
 #define DISJOINT_SET_H
 
 #include <unordered_map>
-#include "Tile.h"
+#include <unordered_set>
 
+template <typename T>
 class DisjointSet {
 private:
-    std::unordered_map<Tile*, Tile*> parent; // Maps element -> parent
-    std::unordered_map<Tile*, size_t> rank;   // Maps element -> rank
-
+    std::unordered_map<T, T> parent; // Maps element -> parent
+    std::unordered_map<T, size_t> rank;   // Maps element -> rank
+    
 public:
+    std::unordered_set<T> allParents;
+
     // Add a new element as its own set
-    void add(Tile* tile) {
-        if(parent.find(tile) == parent.end()) {
-            parent[tile] = tile;
-            rank[tile] = 1;
+    void add(T element) {
+        if(parent.find(element) == parent.end()) {
+            parent[element] = element;
+            allParents.insert(element);
+            rank[element] = 1;
         }
     }
 
@@ -22,38 +26,48 @@ public:
      * Find with path compression
      * If not in the set, returns NULL
      */
-    Tile* find(Tile* tile) {
-        if (parent.find(tile) == parent.end()) {
+    T find(T element) {
+        if (parent.find(element) == parent.end()) {
             return NULL;
         }
-        if (parent[tile] != tile) {
-            parent[tile] = find(parent[tile]);
+        if (parent[element] != element) {
+            parent[element] = find(parent[element]);
         }
-        return parent[tile];
+        return parent[element];
     }
 
     // Unites two sets
-    void unite(Tile* a, Tile* b) {
-        Tile* rootA = find(a);
-        Tile* rootB = find(b);
+    void unite(T a, T b) {
+        T rootA = find(a);
+        T rootB = find(b);
 
         if (rootA != rootB) {
             // Union by rank
             if (rank[rootA] > rank[rootB]) {
                 parent[rootB] = rootA;
+                allParents.insert(rootA);
+                allParents.erase(rootB);
             } 
             else if (rank[rootA] < rank[rootB]) {
                 parent[rootA] = rootB;
+                allParents.insert(rootB);
+                allParents.erase(rootA);
             } 
             else {
                 parent[rootB] = rootA;
+                allParents.insert(rootA);
+                allParents.erase(rootB);
                 rank[rootA]++;
             }
         }
     }
 
-    bool connected(Tile* a, Tile* b) {
+    bool connected(T a, T b) {
         return find(a) == find(b);
+    }
+
+    bool isParent(T element) {
+        return allParents.find(element) == allParents.end();
     }
 };
 
