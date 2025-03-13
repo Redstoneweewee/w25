@@ -10,6 +10,7 @@ Map::Map(std::istream& stream) {
 
     initializeCharMap(stream);
     initializeTileMap();
+    initializeRegionalDisjointSet();
 }
 
 Map::~Map() {
@@ -28,7 +29,14 @@ std::string Map::route(Point src, Point dst) {
     return "";
 }
 
-
+void Map::printPerimeter() const {
+    for(vector<Tile*> row : tileMap) {
+        for(Tile* tile : row) {
+            std::cout << tile->isPerimeter;
+        }
+        std::cout << "\n";
+    }
+}
 void Map::printMap() const {
     for(vector<Tile*> row : tileMap) {
         for(Tile* tile : row) {
@@ -98,6 +106,7 @@ void Map::initializeTileMap() {
  */
 void Map::initializeAndSetNeighbors(Tile* tile) {
     tileMap[tile->point.y][tile->point.x] = tile;
+
     std::array<Point, 4> neighborPoints = calculateNeighborPoints(tile->point);
     for(size_t i=0; i<4; i++) {
         if(isPointValid(neighborPoints[i])) {
@@ -110,10 +119,22 @@ void Map::initializeAndSetNeighbors(Tile* tile) {
             else {
                 tile->neighbors[i] = tileMap[neighborPoints[i].y][neighborPoints[i].x];
             }
+
+            if((tile->type == '.' || tile->type == '*') && tile->neighbors[i]->type == '#') {
+                tile->setIsPerimeter();
+            }
         }
     }
 }   
 
+//must be done after tileMap init
+void Map::initializeRegionalDisjointSet() {
+    for(vector<Tile*> row : tileMap) {
+        for(Tile* tile : row) {
+            regionalDisjointSet.add(tile);
+        }
+    }
+}
 
 
 

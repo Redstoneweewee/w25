@@ -26,8 +26,8 @@ int main(int argc, char** argv) {
 
   Map map(stream);
 
-  map.printMapStandard();
   map.printMap();
+  map.printPerimeter();
 
   return 0;
 }

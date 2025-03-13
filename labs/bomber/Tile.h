@@ -7,6 +7,7 @@
 struct Tile {
     char type;
     Point point;
+    bool isPerimeter = false;
     /**
      * neighbors[0] = top neighbor
      * neighbors[1] = right neighbor
@@ -27,6 +28,10 @@ struct Tile {
         for(size_t i=0; i<4; i++) {
             this->neighbors[i] = other.neighbors[i];
         }
+    }
+
+    void setIsPerimeter() {
+        isPerimeter = true;
     }
 };
 
