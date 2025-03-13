@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
 
   Map map(stream);
 
+  map.printMapStandard();
   map.printMap();
 
   return 0;

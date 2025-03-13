@@ -7,7 +7,14 @@
 struct Tile {
     char type;
     Point point;
-    Tile* neighbors[4];
+    /**
+     * neighbors[0] = top neighbor
+     * neighbors[1] = right neighbor
+     * neighbors[2] = bottom neighbor
+     * neighbors[3] = left neighbor
+     * NULL = edge of map
+     */
+    Tile* neighbors[4] = {NULL};
 
     Tile(char type, Point point) {
         this->type = type;
@@ -21,8 +28,6 @@ struct Tile {
             this->neighbors[i] = other.neighbors[i];
         }
     }
-
-    void setNeighbors(Tile* neighbors[4]);
 };
 
 #endif
