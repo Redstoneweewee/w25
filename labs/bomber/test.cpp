@@ -30,6 +30,7 @@ int main(int argc, char** argv) {
   map.printPerimeter();
   map.printRegionsFromDisjointSet();
   map.printRegionConnections();
+  map.printMapDisjointSet();
   //map.printRegionsFromRegions();
 
   return 0;

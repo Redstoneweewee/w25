@@ -35,6 +35,13 @@ std::string Map::route(Point src, Point dst) {
     return "";
 }
 
+void Map::printMapDisjointSet() {
+    for(auto it : regions) {
+        Region* region = it.second;
+        std::cout << "region " << region->regionName << "'s parent: " << mapDisjointSet.find(region)->regionName << "\n";
+    }
+    std::cout << "\n";
+}
 void Map::printRegionConnections() {
     for(auto it : regions) {
         Region* region = it.second;

@@ -37,6 +37,7 @@ public:
     void printRegionsFromRegions();
     void printRegionalDisjointSet();
     void printRegionConnections();
+    void printMapDisjointSet();
 
 private:
     void initializeCharMap(std::istream& stream);
