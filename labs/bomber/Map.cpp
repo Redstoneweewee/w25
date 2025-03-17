@@ -4,7 +4,7 @@
 #include "Errors.h"
 #include "Region.h"
 
-#pragma region Members
+
 // Member Functions ------------------------------------------------------------------------------
 Map::Map(std::istream& stream) {
     height = 0;
@@ -134,13 +134,13 @@ void Map::printMap() const {
     }
 }
 */
-#pragma endregion
 
 
 
 
 
-#pragma region Init
+
+
 //Partial initialization functions ------------------------------------------------------------------------------
 void Map::initializeCharMap(std::istream& stream) {
     string currentLine;
@@ -154,7 +154,7 @@ void Map::initializeCharMap(std::istream& stream) {
         height++;
     }
 }
-#pragma endregion
+
 
 //must be done after charMap init
 void Map::initializeTileMap() {
@@ -311,7 +311,7 @@ void Map::createRegionConnections(Region* region) {
 
 
 
-#pragma region Helpers
+
 //Helper functions ------------------------------------------------------------------------------
 
 bool Map::isPointValid(const Point& p) const {
@@ -355,8 +355,4 @@ std::array<Point, 4> Map::calculateNeighborPoints(const Point& p) {
         Point(p.x, p.y+1)
     };
 }
-
-
-
-#pragma endregion
 
