@@ -35,6 +35,10 @@ struct Region {
     };
     /**Mainly for testing purporses, not actually necessary */
     char regionName = ' ';
+    /**Only used in initializing region connections*/
+    Tile* parentTile;
+    /**Perimeter tiles are wall tiles touching the border of the region 
+     * but is not actually a part of the region's disjoint set*/
     std::vector<Tile*> perimeter = std::vector<Tile*>{};
     std::vector<Tile*> bombs = std::vector<Tile*>{};
     std::unordered_set<Connection*> connections;
@@ -45,6 +49,21 @@ struct Region {
             c->getOther(this)->connections.erase(c);
             delete c;
         }
+    }
+};
+
+
+struct LockedRegion : public Region {
+    private:
+    bool mIsLocked = true;
+
+    public:
+    bool isLocked() {
+        return mIsLocked;
+    }
+    void unlock(int& currentNumOfBombs) {
+        mIsLocked = false;
+        currentNumOfBombs--;
     }
 };
 

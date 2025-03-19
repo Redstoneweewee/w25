@@ -107,7 +107,7 @@ void Map::printRegionConnections() {
         Region* region = it.second;
         std::cout << "region " << region->regionName << ": ";
         for(Region::Connection* connection : region->connections) {
-            std::cout << " <-" << connection->weight << "-> " << connection->getOther(region)->regionName << ", ";
+            std::cout << connection->getSelfTile(region)->point << "<-" << connection->weight << "->" << connection->getOtherTile(region)->point << " " << connection->getOther(region)->regionName << ", ";
         }
         std::cout << "\n";
     }
@@ -159,9 +159,21 @@ void Map::printRegionsFromDisjointSet() {
     std::cout << "\n";
 }
 void Map::printPerimeter() const {
+    unordered_set<Tile*> perimeterTiles;
+    for(auto it : regions) {
+        Region* region = it.second;
+        for(Tile* perimeter : region->perimeter) {
+            perimeterTiles.insert(perimeter);
+        }
+    }
     for(vector<Tile*> row : tileMap) {
         for(Tile* tile : row) {
-            std::cout << (tile->isPerimeter ? "X" : " ");
+            if(perimeterTiles.find(tile) != perimeterTiles.end()) {
+                std::cout << "X";
+            }
+            else {
+                std::cout << " ";
+            }
         }
         std::cout << "\n";
     }
@@ -248,7 +260,7 @@ void Map::initializeAndSetNeighbors(Tile* tile) {
             }
 
             if((tile->type == '.' || tile->type == '*') && tile->neighbors[i]->type == '#') {
-                tile->setIsPerimeter();
+                tile->setIsNearPerimeterWall();
             }
         }
     }
@@ -283,12 +295,17 @@ void Map::initializeRegions() {
     char startingChar = 'A';               //Mainly for testing purporses, not actually necessary
     for(Tile* parentTile : regionalDisjointSet.allParents) {
         Region* region = new Region;
+        region->parentTile = parentTile;
         region->regionName = startingChar; //Mainly for testing purporses, not actually necessary
         for(vector<Tile*> row : tileMap) {
             for(Tile* tile : row) {
                 if(regionalDisjointSet.find(tile) == parentTile) {
-                    if(tile->isPerimeter) {
-                        region->perimeter.push_back(tile);
+                    if(tile->isNearPerimeterWall) {
+                        for(size_t i=0; i<4; i++) {
+                            if(tile->neighbors[i] != NULL && tile->neighbors[i]->type == '#') {
+                                region->perimeter.push_back(tile->neighbors[i]);
+                            }
+                        }
                     }
                     if(tile->type == '*') {
                         region->bombs.push_back(tile);
@@ -320,7 +337,8 @@ void Map::createRegionConnections(Region* region) {
          */
         for(size_t i=0; i<4; i++) {
             Point nextPoint = testingTile->point;
-            size_t numOfWalls = 0;
+            size_t numOfWalls = 1;
+            Tile* previousNextTile = testingTile;
             int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
             int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
             while(true) {
@@ -330,8 +348,11 @@ void Map::createRegionConnections(Region* region) {
                 //std::cout << "checking point " << nextPoint << "\n";
                 Tile* nextTile = getTile(nextPoint);
                 if(nextTile->type == '~') { /*std::cout << "1\n";*/ break; }
-                else if(nextTile->type == '#') { numOfWalls++; } //this has to go before the next statement because walls are not part of the disjoint sets
-                else if(regionalDisjointSet.connected(testingTile, nextTile)) { /*std::cout << "2\n";*/ break; }
+                else if(nextTile->type == '#') { 
+                    previousNextTile = nextTile;
+                    numOfWalls++; 
+                } //this has to go before the next statement because walls are not part of the disjoint sets
+                else if(regionalDisjointSet.find(nextTile) == region->parentTile) { break; }
                 //If none of those are true, then we have reached a new region
                 else {
                     Region* otherRegion = getRegion(nextTile);
@@ -339,6 +360,14 @@ void Map::createRegionConnections(Region* region) {
                     if(region->connectedRegions.find(otherRegion) != region->connectedRegions.end()) {
                         for(Region::Connection* connection : region->connections) {
                             if(connection->getOther(region) == otherRegion && connection->weight > numOfWalls) {
+                                if(connection->region1 == region) {
+                                    connection->tile1 = testingTile;
+                                    connection->tile2 = previousNextTile;
+                                }
+                                else {
+                                    connection->tile1 = previousNextTile;
+                                    connection->tile2 = testingTile;
+                                }
                                 connection->weight = numOfWalls;
                                 break;
                             }
@@ -347,16 +376,13 @@ void Map::createRegionConnections(Region* region) {
                     //For new path
                     if(region->connectedRegions.find(otherRegion) == region->connectedRegions.end()) {
                         //std::cout << "3\n";
-                        Region::Connection* connection = new Region::Connection{numOfWalls, region, testingTile, otherRegion, nextTile};
+                        Region::Connection* connection = new Region::Connection{numOfWalls, region, testingTile, otherRegion, previousNextTile};
                         region->connections.insert(connection);
                         otherRegion->connections.insert(connection);
                         region->connectedRegions.insert(otherRegion);
                         otherRegion->connectedRegions.insert(region);
                         mapDisjointSet.add(otherRegion);
                         mapDisjointSet.unite(region, otherRegion);
-                    }
-                    else {
-                        //std::cout << "4\n";
                     }
                     //If not true, the regions are already connected, so no need to reconnect them
                     break;
