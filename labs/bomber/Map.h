@@ -55,6 +55,8 @@ private:
     Tile* getTile(const Point& p) const;
     Region* getRegion(Tile* t);
     std::array<Point, 4> calculateNeighborPoints(const Point& p);
+
+    vector<Region*> regionPathFinidng(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_nodes);
 };
 
 #endif

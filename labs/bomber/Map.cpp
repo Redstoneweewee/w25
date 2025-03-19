@@ -27,12 +27,72 @@ Map::~Map() {
     }
 }
 
+ /* 
+ Member Variables
+ size_t height;
+ size_t length;
+ vector<vector<char>> charMap;
+ vector<vector<Tile*>> tileMap;
+ unordered_map<Tile*, Region*> regions;
+
+ -This one has one set = all tiles in one region
+ DisjointSet<Tile*> regionalDisjointSet;
+
+ -This one has sets of connected regions
+ DisjointSet<Region*> mapDisjointSet;
+ */
 
 std::string Map::route(Point src, Point dst) {
     if (!isPointReachable(src, true) || !isPointReachable(dst, false)) {
         throw PointError(src);
     }
+    unordered_map<Region*, Region*> visited_nodes;  //int is no of bombs needed to get to region
+    int bomb_count = regions.at(tileMap[src.y][src.x])->bombs.size();
+    vector<Region*> region_route_to_dst = regionPathFinidng(src, dst,bomb_count,visited_nodes);
+
+
     return "";
+}
+
+vector<Region*> Map::regionPathFinidng(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_nodes){
+    Region* starting_region = regions.at(tileMap[src.y][src.x]); //do throw-catch checking system
+    Region* ending_region = regions.at(tileMap[dst.y][dst.x]);
+
+    //Tile* starting_tile = tileMap[src.y][src.x];
+    //Tile* ending_tile = tileMap[dst.y][dst.x];
+
+    vector<Region*> region_route;
+                //make variables for result from getother()
+        for (Region::Connection* current_connection: starting_region->connections){
+            //lines of code to check if neighbor region is already in visited (no backtracking allowed)
+            int current_bomb_count = bomb_count;
+            auto iterator = visited_nodes.find(current_connection->getOther(starting_region));
+            if (iterator != visited_nodes.end()){
+                continue;
+            }
+            if (current_connection->getOther(starting_region) == ending_region ){
+                if (bomb_count < current_connection->weight){
+                continue; //indicates that this connection couldn't get to dst
+                }
+                region_route.push_back(current_connection->getOther(starting_region));
+                region_route.push_back(starting_region);
+            return region_route;
+            } 
+            else if (bomb_count >= current_connection->weight){
+            current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
+            visited_nodes[starting_region] = starting_region;
+            vector<Region*> updated_route = regionPathFinidng(current_connection->getOther(starting_region)->perimeter[0]->point, dst,current_bomb_count, visited_nodes);
+                if (updated_route.size() == 0)
+                {
+                continue;
+                }
+                region_route = updated_route;
+                region_route.push_back(starting_region);
+                return region_route;
+            }
+            continue;
+        }
+    return region_route;
 }
 
 void Map::printMapDisjointSet() {
