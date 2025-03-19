@@ -19,6 +19,7 @@ class Map {
     size_t length;
     vector<vector<char>> charMap;
     vector<vector<Tile*>> tileMap;
+
     unordered_map<Tile*, Region*> regions;
 
     /** This one has one set = all tiles in one region*/

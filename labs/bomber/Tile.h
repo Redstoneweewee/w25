@@ -7,7 +7,7 @@
 struct Tile {
     char type;
     Point point;
-    bool isPerimeter = false;
+    bool isNearPerimeterWall = false;
     /**
      * neighbors[0] = left neighbor
      * neighbors[2] = top neighbor
@@ -30,8 +30,8 @@ struct Tile {
         }
     }
 
-    void setIsPerimeter() {
-        isPerimeter = true;
+    void setIsNearPerimeterWall() {
+        isNearPerimeterWall = true;
     }
 };
 
