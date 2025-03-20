@@ -27,11 +27,14 @@ class Map {
     
     /** This one has sets of connected regions*/
     DisjointSet<Region*> mapDisjointSet;
+
+    /** This is used to initialize all possible 2-region connections */
+    unordered_map<Region*, unordered_set<Region*>> hasDirectConnection;
 public:
     Map(std::istream& stream);
     ~Map();
 
-    std::string route(Point src, Point dst);
+    //std::string route(Point src, Point dst);
     void printMap() const;
     void printPerimeter() const;
     void printRegionsFromDisjointSet();
@@ -39,6 +42,7 @@ public:
     void printRegionalDisjointSet();
     void printRegionConnections();
     void printMapDisjointSet();
+    void printScores() const;
 
 private:
     void initializeCharMap(std::istream& stream);
@@ -46,6 +50,7 @@ private:
     void initializeRegionalDisjointSet();
     void initializeRegions();
     void initializeMapDisjointSet();
+    void initializeTripletConnections();
 
     void initializeAndSetNeighbors(Tile* tile);
     void createRegionFromTile(Tile* tile);
@@ -56,8 +61,13 @@ private:
     Tile* getTile(const Point& p) const;
     Region* getRegion(Tile* t);
     std::array<Point, 4> calculateNeighborPoints(const Point& p);
-
-    vector<Region*> regionPathFinidng(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_nodes);
+    vector<vector<size_t>> countTileSteps(size_t m, size_t n);
+    void calculateOptimalTriplet(vector<Region*> triplet);
+    
+    Point getTopLeft(Tile* tile1, Tile* tile2);
+    Point getBottomRight(Tile* tile1, Tile* tile2);
+    vector<Tile*> createTileBox(Point topLeft, Point bottomRight);
+    //vector<Region*> regionPathFinidng(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_nodes);
 };
 
 #endif

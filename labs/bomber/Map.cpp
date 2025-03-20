@@ -1,6 +1,8 @@
 #include "Map.h"
 #include <sstream>
 #include <array>
+#include <cmath>
+#include <map>
 #include "Errors.h"
 #include "Region.h"
 
@@ -14,6 +16,7 @@ Map::Map(std::istream& stream) {
     initializeRegionalDisjointSet();
     initializeRegions();
     initializeMapDisjointSet();
+    initializeTripletConnections();
 }
 
 Map::~Map() {
@@ -42,6 +45,11 @@ Map::~Map() {
  DisjointSet<Region*> mapDisjointSet;
  */
 
+
+
+// Routing Functions ------------------------------------------------------------------------------
+
+/*
 std::string Map::route(Point src, Point dst) {
     if (!isPointReachable(src, true) || !isPointReachable(dst, false)) {
         throw PointError(src);
@@ -94,6 +102,9 @@ vector<Region*> Map::regionPathFinidng(Point& src, Point& dst, int bomb_count, u
         }
     return region_route;
 }
+*/
+
+// Printing Functions ------------------------------------------------------------------------------
 
 void Map::printMapDisjointSet() {
     for(auto it : regions) {
@@ -142,7 +153,26 @@ void Map::printRegionsFromRegions() {
 }
 
 void Map::printRegionsFromDisjointSet() {
+    bool first = true;
+    size_t rowNum = 0;
     for(vector<Tile*> row : tileMap) {
+        if(first) {
+            cout << "  ";
+            for(size_t i=0; i<row.size(); i++) {
+                if(i % 10 == 0) { cout << i/10; }
+                else { cout << " "; }
+            }
+            cout << "\n";
+            cout << "  ";
+            for(size_t i=0; i<row.size(); i++) {
+                cout << i % 10;
+            }
+            cout << "\n";
+            first = false;
+        }
+        if(rowNum % 10 == 0) { cout << rowNum/10; }
+        else { cout << " "; }
+        cout << rowNum % 10;
         for(Tile* tile : row) {
             Tile* parentTile = regionalDisjointSet.find(tile);
             if(parentTile != NULL) {
@@ -154,6 +184,7 @@ void Map::printRegionsFromDisjointSet() {
                 std::cout << " ";
             }
         }
+        rowNum++;
         std::cout << "\n";
     }
     std::cout << "\n";
@@ -183,6 +214,16 @@ void Map::printMap() const {
     for(vector<Tile*> row : tileMap) {
         for(Tile* tile : row) {
             std::cout << tile->type;
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n";
+}
+
+void Map::printScores() const {
+    for(vector<Tile*> row : tileMap) {
+        for(Tile* tile : row) {
+            std::cout << tile->score << "\t";
         }
         std::cout << "\n";
     }
@@ -323,76 +364,109 @@ void Map::initializeRegions() {
 void Map::initializeMapDisjointSet() {
     for(auto it : regions) {
         mapDisjointSet.add(it.second);
+    }
+    for(auto it : regions) {
         createRegionConnections(it.second);
     }
 }
 
 void Map::createRegionConnections(Region* region) {
-    for(Tile* testingTile : region->perimeter) {
-        /**
-         * First probe:  left, -x,  0
-         * Second probe: up,    0, -y
-         * Third probe:  right, x,  0
-         * Fourth probe: down,  0,  y
-         */
-        for(size_t i=0; i<4; i++) {
-            Point nextPoint = testingTile->point;
-            size_t numOfWalls = 1;
-            Tile* previousNextTile = testingTile;
-            int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
-            int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
-            while(true) {
-                nextPoint.x += xInc;
-                nextPoint.y += yInc;
-                if(!isPointValid(nextPoint)) { break; }
-                //std::cout << "checking point " << nextPoint << "\n";
-                Tile* nextTile = getTile(nextPoint);
-                if(nextTile->type == '~') { /*std::cout << "1\n";*/ break; }
-                else if(nextTile->type == '#') { 
-                    previousNextTile = nextTile;
-                    numOfWalls++; 
-                } //this has to go before the next statement because walls are not part of the disjoint sets
-                else if(regionalDisjointSet.find(nextTile) == region->parentTile) { break; }
-                //If none of those are true, then we have reached a new region
-                else {
-                    Region* otherRegion = getRegion(nextTile);
-                    //For optimal path
-                    if(region->connectedRegions.find(otherRegion) != region->connectedRegions.end()) {
-                        for(Region::Connection* connection : region->connections) {
-                            if(connection->getOther(region) == otherRegion && connection->weight > numOfWalls) {
-                                if(connection->region1 == region) {
-                                    connection->tile1 = testingTile;
-                                    connection->tile2 = previousNextTile;
-                                }
-                                else {
-                                    connection->tile1 = previousNextTile;
-                                    connection->tile2 = testingTile;
-                                }
-                                connection->weight = numOfWalls;
-                                break;
-                            }
-                        }
-                    }
-                    //For new path
-                    if(region->connectedRegions.find(otherRegion) == region->connectedRegions.end()) {
-                        //std::cout << "3\n";
-                        Region::Connection* connection = new Region::Connection{numOfWalls, region, testingTile, otherRegion, previousNextTile};
-                        region->connections.insert(connection);
-                        otherRegion->connections.insert(connection);
-                        region->connectedRegions.insert(otherRegion);
-                        otherRegion->connectedRegions.insert(region);
-                        mapDisjointSet.add(otherRegion);
-                        mapDisjointSet.unite(region, otherRegion);
-                    }
-                    //If not true, the regions are already connected, so no need to reconnect them
-                    break;
+    for(auto it : regions) {
+        map<Tile*, vector<Tile*>> minPaths; //key = testingTiles, value = vector of otherTiles
+        size_t minDistance = 9999999;
+        Region* otherRegion = it.second;
+        if(otherRegion == region || hasDirectConnection[region].count(otherRegion) > 0) { continue; }
+        for(Tile* testingTile : region->perimeter) {
+
+            for(Tile* otherTile : otherRegion->perimeter) {
+                size_t distance = abs(otherTile->point.x-testingTile->point.x) + abs(otherTile->point.y-testingTile->point.y);
+                //cout << "distance between " << testingTile->point << " and " << otherTile->point << ": " << distance << "\n";
+                if(distance < minDistance) {
+                    minPaths.clear();
+                    minPaths.insert({testingTile, vector<Tile*>{otherTile}});
+                    minDistance = distance;
                 }
+                else if(distance == minDistance) {
+                    if(minPaths.find(testingTile) != minPaths.end()) {
+                        minPaths.find(testingTile)->second.push_back(otherTile);
+                    }
+                    else {
+                        minPaths.insert({testingTile, vector<Tile*>{otherTile}});
+                    }
+                }
+            }
+        }
+        for(auto it : minPaths) {
+            mapDisjointSet.unite(region, otherRegion);
+            hasDirectConnection[region].insert(otherRegion);
+            hasDirectConnection[otherRegion].insert(region);
+            Tile* testingTile = it.first;
+            for(Tile* otherTile : it.second) {
+                Region::Connection* connection = new Region::Connection{minDistance+1, region, testingTile, otherRegion, otherTile};
+                region->connections.insert(connection);
+                otherRegion->connections.insert(connection);
+                region->connectedRegions.insert(otherRegion);
+                otherRegion->connectedRegions.insert(region);
+                cout << "shortest path: " << testingTile->point << ", " << otherTile->point << " from region " << region->regionName << " to region " << otherRegion->regionName <<"\n";
+                //Point topLeft = Point(testingTile->point.x < otherTile->point.x ? testingTile->point.x : otherTile->point.x,
+                //                      testingTile->point.y < otherTile->point.y ? testingTile->point.y : otherTile->point.y);
+                //Point bottomRight = Point(testingTile->point.x > otherTile->point.x ? testingTile->point.x : otherTile->point.x,
+                //                          testingTile->point.y > otherTile->point.y ? testingTile->point.y : otherTile->point.y);
+                //
+                //size_t height = bottomRight.y - topLeft.y + 1;
+                //size_t width = bottomRight.x - topLeft.x + 1;
+                //vector<vector<size_t>> scores = countTileSteps(height, width);
+                //for(size_t i=0; i<height; i++) {
+                //    for(size_t j=0; j<width; j++) {
+                //        if(tileMap[topLeft.y+i][topLeft.x+j]->type != '#') { continue; }
+                //        tileMap[topLeft.y+i][topLeft.x+j]->score += scores[i][j];
+                //    }
+                //}
             }
         }
     }
 }
 
 
+void Map::initializeTripletConnections() {
+    vector<Region*> regionsVector;
+    for(auto it : regions) {
+        regionsVector.push_back(it.second);
+    }
+
+    size_t n = regionsVector.size();
+    for (size_t i = 0; i < n; i++) {
+        for (size_t j = i + 1; j < n; j++) {
+            for (size_t k = j + 1; k < n; k++) {
+
+                vector<Region*> triplet = {regionsVector[i], regionsVector[j], regionsVector[k]};
+
+                calculateOptimalTriplet(triplet);
+                Region::Connection* optimalConnection = NULL;
+                Point optimalPoint;
+                size_t optimalWeight = 999999;
+
+                //region1 <--> region2
+                for(Region::Connection* connection : region1->connections) {
+                    if(connection->getOther(region1) == region2) {
+                        //create connection box
+                        //check all sides to find region3
+
+                    }
+                }
+                //region1 <--> region3
+
+                //region2 <--> region3
+
+            }
+        }
+    }
+}
+
+
+void Map::calculateOptimalTriplet(vector<Region*> triplet) {
+
+}
 
 
 
@@ -442,3 +516,41 @@ std::array<Point, 4> Map::calculateNeighborPoints(const Point& p) {
     };
 }
 
+
+
+vector<vector<size_t>> Map::countTileSteps(size_t m, size_t n) {
+    // Initialize a DP table to store the number of ways to reach each tile
+    vector<vector<size_t>> dp(m, vector<size_t>(n, 0));
+    
+    // Initialize a step count table to store the number of times each tile is stepped on
+    vector<vector<size_t>> stepCount(m, vector<size_t>(n, 0));
+    
+    // Base case: There's only one way to reach the starting tile (0, 0)
+    dp[0][0] = 1;
+    
+    // Fill the DP table
+    for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            if (i > 0) {
+                dp[i][j] += dp[i-1][j]; // Move down
+            }
+            if (j > 0) {
+                dp[i][j] += dp[i][j-1]; // Move right
+            }
+        }
+    }
+    
+    // Calculate the number of times each tile is stepped on
+    for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            // Number of ways to reach (i, j)
+            size_t waysToReach = dp[i][j];
+            // Number of ways to go from (i, j) to (m-1, n-1)
+            size_t waysToEnd = dp[m-1-i][n-1-j];
+            // Total steps on (i, j) is waysToReach * waysToEnd
+            stepCount[i][j] = waysToReach * waysToEnd;
+        }
+    }
+    
+    return stepCount;
+}
