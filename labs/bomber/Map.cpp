@@ -344,7 +344,7 @@ void Map::initializeRegions() {
                     if(tile->isNearPerimeterWall) {
                         for(size_t i=0; i<4; i++) {
                             if(tile->neighbors[i] != NULL && tile->neighbors[i]->type == '#') {
-                                region->perimeter.push_back(tile->neighbors[i]);
+                                region->perimeter.insert(tile->neighbors[i]);
                             }
                         }
                     }
@@ -379,6 +379,7 @@ void Map::createRegionConnections(Region* region) {
         for(Tile* testingTile : region->perimeter) {
 
             for(Tile* otherTile : otherRegion->perimeter) {
+                if(!isUsefulPath(region, otherRegion, testingTile, otherTile)) { continue; }
                 size_t distance = abs(otherTile->point.x-testingTile->point.x) + abs(otherTile->point.y-testingTile->point.y);
                 //cout << "distance between " << testingTile->point << " and " << otherTile->point << ": " << distance << "\n";
                 if(distance < minDistance) {
@@ -407,11 +408,9 @@ void Map::createRegionConnections(Region* region) {
                 otherRegion->connections.insert(connection);
                 region->connectedRegions.insert(otherRegion);
                 otherRegion->connectedRegions.insert(region);
-                cout << "shortest path: " << testingTile->point << ", " << otherTile->point << " from region " << region->regionName << " to region " << otherRegion->regionName <<"\n";
-                //Point topLeft = Point(testingTile->point.x < otherTile->point.x ? testingTile->point.x : otherTile->point.x,
-                //                      testingTile->point.y < otherTile->point.y ? testingTile->point.y : otherTile->point.y);
-                //Point bottomRight = Point(testingTile->point.x > otherTile->point.x ? testingTile->point.x : otherTile->point.x,
-                //                          testingTile->point.y > otherTile->point.y ? testingTile->point.y : otherTile->point.y);
+                //cout << "shortest path: " << testingTile->point << ", " << otherTile->point << " from region " << region->regionName << " to region " << otherRegion->regionName <<"\n";
+                //Point topLeft = getTopLeft(testingTile, otherTile);
+                //Point bottomRight = getBottomRight(testingTile, otherTile);
                 //
                 //size_t height = bottomRight.y - topLeft.y + 1;
                 //size_t width = bottomRight.x - topLeft.x + 1;
@@ -428,44 +427,194 @@ void Map::createRegionConnections(Region* region) {
 }
 
 
+bool Map::isUsefulPath(Region* region, Region* otherRegion, Tile* tile1, Tile* tile2) {
+    Point topLeft = getTopLeft(tile1, tile2);
+    Point bottomRight = getBottomRight(tile1, tile2);
+    vector<Tile*> pathBox = createTileBox(topLeft, bottomRight);
+    for(Tile* tile : pathBox) {
+        if(tile->type == '~') {
+            return false;
+        }
+        if(getRegion(tile) != NULL && getRegion(tile) != region && getRegion(tile) != otherRegion) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Map::initializeTripletConnections() {
     vector<Region*> regionsVector;
     for(auto it : regions) {
         regionsVector.push_back(it.second);
     }
 
+    unordered_set<Tile*> lockedRegions;
     size_t n = regionsVector.size();
     for (size_t i = 0; i < n; i++) {
         for (size_t j = i + 1; j < n; j++) {
             for (size_t k = j + 1; k < n; k++) {
-
-                vector<Region*> triplet = {regionsVector[i], regionsVector[j], regionsVector[k]};
-
-                calculateOptimalTriplet(triplet);
-                Region::Connection* optimalConnection = NULL;
-                Point optimalPoint;
-                size_t optimalWeight = 999999;
-
-                //region1 <--> region2
-                for(Region::Connection* connection : region1->connections) {
-                    if(connection->getOther(region1) == region2) {
-                        //create connection box
-                        //check all sides to find region3
-
-                    }
+                if(!mapDisjointSet.connected(regionsVector[i], regionsVector[j]) || 
+                   !mapDisjointSet.connected(regionsVector[j], regionsVector[k]) ||
+                   !mapDisjointSet.connected(regionsVector[i], regionsVector[k])) {
+                    continue;
                 }
-                //region1 <--> region3
-
-                //region2 <--> region3
-
+                vector<Region*> triplet = {regionsVector[i], regionsVector[j], regionsVector[k]};
+                for(Tile* optimalTile : calculateOptimalTriplet(triplet)) {
+                    lockedRegions.insert(optimalTile);
+                }
             }
         }
     }
+    vector<vector<char>> testMap(height, vector<char>(length, '.'));
+    for(Tile* tile : lockedRegions) {
+        testMap[tile->point.y][tile->point.x] = 'X';
+    }
+    for(vector<char> row : testMap) {
+        for(char tileText : row) {
+            cout << tileText;
+        }
+        cout << "\n";
+    }
+    cout << "\n";
 }
 
 
-void Map::calculateOptimalTriplet(vector<Region*> triplet) {
+unordered_set<Tile*> Map::calculateOptimalTriplet(vector<Region*> triplet) {
+    Region* region1 = triplet[0];
+    Region* region2 = triplet[1];
+    Region* region3 = triplet[2];
 
+
+    //Region::Connection* optimalConnection = NULL;
+    //optimalTiles should store all lockedRegion tiles
+    unordered_set<Tile*> optimalTiles;
+    size_t optimalDistance = 999999;
+
+    //region1 <--> region2
+    for(Region::Connection* connection : region1->connections) {
+        if(connection->getOther(region1) == region2) {
+            Point topLeft = getTopLeft(connection->tile1, connection->tile2);
+            Point bottomRight = getBottomRight(connection->tile1, connection->tile2);
+            vector<Tile*> tileBox = createTileBox(topLeft, bottomRight);
+            for(Tile* tile : tileBox) {
+                /**
+                 * First probe:  left, -x,  0
+                 * Second probe: up,    0, -y
+                 * Third probe:  right, x,  0
+                 * Fourth probe: down,  0,  y
+                 */
+                //if(tile->point.x == 10 && tile->point.y == 3) {
+                //    cout << "testing tile " << tile->point << "\n";
+                //}
+                for(size_t i=0; i<4; i++) {
+                    size_t distance = 0;
+                    int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
+                    int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+                    bool reachesThirdRegion = tryReachThirdRegion(distance, tile, xInc, yInc, region1, region2, region3);
+                    if(reachesThirdRegion && distance < optimalDistance) {
+                        //cout << "new opt path from " << tile->point << " between " << region1->regionName << region2->regionName << region3->regionName<<"\n";
+                        optimalTiles.clear();
+                        optimalTiles.insert(tile);
+                        optimalDistance = distance;
+                    }
+                    else if(reachesThirdRegion && distance == optimalDistance) {
+                        //cout << "huh " << distance << " " << tile->point << "\n";
+                        optimalTiles.insert(tile);
+                    }
+                }
+            }
+        }
+    }
+    //region1 <--> region3
+    for(Region::Connection* connection : region1->connections) {
+        if(connection->getOther(region1) == region3) {
+            Point topLeft = getTopLeft(connection->tile1, connection->tile2);
+            Point bottomRight = getBottomRight(connection->tile1, connection->tile2);
+            vector<Tile*> tileBox = createTileBox(topLeft, bottomRight);
+            for(Tile* tile : tileBox) {
+                /**
+                 * First probe:  left, -x,  0
+                 * Second probe: up,    0, -y
+                 * Third probe:  right, x,  0
+                 * Fourth probe: down,  0,  y
+                 */
+                for(size_t i=0; i<4; i++) {
+                    size_t distance = 0;
+                    int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
+                    int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+                    bool reachesThirdRegion = tryReachThirdRegion(distance, tile, xInc, yInc, region1, region3, region2);
+                    if(reachesThirdRegion && distance < optimalDistance) {
+                        optimalTiles.clear();
+                        optimalTiles.insert(tile);
+                        optimalDistance = distance;
+                    }
+                    else if(reachesThirdRegion && distance == optimalDistance) {
+                        optimalTiles.insert(tile);
+                    }
+                }
+            }
+        }
+    }
+    //region2 <--> region3
+    for(Region::Connection* connection : region2->connections) {
+        if(connection->getOther(region2) == region3) {
+            Point topLeft = getTopLeft(connection->tile1, connection->tile2);
+            Point bottomRight = getBottomRight(connection->tile1, connection->tile2);
+            vector<Tile*> tileBox = createTileBox(topLeft, bottomRight);
+            for(Tile* tile : tileBox) {
+                /**
+                 * First probe:  left, -x,  0
+                 * Second probe: up,    0, -y
+                 * Third probe:  right, x,  0
+                 * Fourth probe: down,  0,  y
+                 */
+                for(size_t i=0; i<4; i++) {
+                    size_t distance = 0;
+                    int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
+                    int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+                    bool reachesThirdRegion = tryReachThirdRegion(distance, tile, xInc, yInc, region2, region3, region1);
+                    if(reachesThirdRegion && distance < optimalDistance) {
+                        optimalTiles.clear();
+                        optimalTiles.insert(tile);
+                        optimalDistance = distance;
+                    }
+                    else if(reachesThirdRegion && distance == optimalDistance) {
+                        optimalTiles.insert(tile);
+                    }
+                }
+            }
+        }
+    }
+
+    //for(Tile* tile : optimalTiles) {
+    //    std::cout << "lockedRegion tile: " << tile->point << " with dist " << optimalDistance << " connecting regions "
+    //              << region1->regionName << region2->regionName << region3->regionName<<"\n";
+    //}
+    return optimalTiles;
+}
+
+
+
+
+bool Map::tryReachThirdRegion(size_t& returnDistance, Tile* startingTile, int xInc, int yInc, Region* region1, Region* region2, Region* region3) {
+    returnDistance = 0;
+    Point nextPoint = startingTile->point;
+    while(true) {
+        //This finds if the nextTile is a perimeter of region3
+        //We test the point itself as well because it could be a perimeter of region3
+        if(!isPointValid(nextPoint)) { return false; }
+        Tile* nextTile = getTile(nextPoint);
+        if(nextTile->type == '~') { return false; }
+        if(getRegion(regionalDisjointSet.find(nextTile)) != NULL && 
+          (getRegion(regionalDisjointSet.find(nextTile)) != region1 || getRegion(regionalDisjointSet.find(nextTile)) != region2 || getRegion(regionalDisjointSet.find(nextTile)) != region3)) { return false; }
+        else if(region3->perimeter.find(nextTile) != region3->perimeter.end()) {
+            return true;
+        }
+        //else, we go to the next tile
+        returnDistance++;
+        nextPoint.x += xInc;
+        nextPoint.y += yInc;
+    }
 }
 
 
@@ -553,4 +702,25 @@ vector<vector<size_t>> Map::countTileSteps(size_t m, size_t n) {
     }
     
     return stepCount;
+}
+
+Point Map::getTopLeft(Tile* tile1, Tile* tile2) {
+    return Point(tile1->point.x < tile2->point.x ? tile1->point.x : tile2->point.x,
+                 tile1->point.y < tile2->point.y ? tile1->point.y : tile2->point.y);
+}
+
+
+Point Map::getBottomRight(Tile* tile1, Tile* tile2) {
+    return Point(tile1->point.x > tile2->point.x ? tile1->point.x : tile2->point.x,
+                 tile1->point.y > tile2->point.y ? tile1->point.y : tile2->point.y);
+}
+
+vector<Tile*> Map::createTileBox(Point topLeft, Point bottomRight) {
+    vector<Tile*> output;
+    for(int i=topLeft.y; i<=bottomRight.y; i++) {
+        for(int j=topLeft.x; j<=bottomRight.x; j++) {
+            output.push_back(tileMap[i][j]);
+        }
+    }
+    return output;
 }

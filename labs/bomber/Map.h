@@ -55,6 +55,7 @@ private:
     void initializeAndSetNeighbors(Tile* tile);
     void createRegionFromTile(Tile* tile);
     void createRegionConnections(Region* region);
+    bool tryReachThirdRegion(size_t& returnDistance, Tile* startingTile, int xInc, int yInc, Region* region1, Region* region2, Region* region3);
 
     bool isPointValid(const Point& p) const;
     bool isPointReachable(Point& p, bool isStartingPoint) const;
@@ -62,7 +63,8 @@ private:
     Region* getRegion(Tile* t);
     std::array<Point, 4> calculateNeighborPoints(const Point& p);
     vector<vector<size_t>> countTileSteps(size_t m, size_t n);
-    void calculateOptimalTriplet(vector<Region*> triplet);
+    bool isUsefulPath(Region* region, Region* otherRegion, Tile* tile1, Tile* tile2);
+    unordered_set<Tile*> calculateOptimalTriplet(vector<Region*> triplet);
     
     Point getTopLeft(Tile* tile1, Tile* tile2);
     Point getBottomRight(Tile* tile1, Tile* tile2);

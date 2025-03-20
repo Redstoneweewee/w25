@@ -39,7 +39,7 @@ struct Region {
     Tile* parentTile;
     /**Perimeter tiles are wall tiles touching the border of the region 
      * but is not actually a part of the region's disjoint set*/
-    std::vector<Tile*> perimeter = std::vector<Tile*>{};
+    std::unordered_set<Tile*> perimeter = std::unordered_set<Tile*>{};
     std::vector<Tile*> bombs = std::vector<Tile*>{};
     std::unordered_set<Connection*> connections;
     std::unordered_set<Region*> connectedRegions;
