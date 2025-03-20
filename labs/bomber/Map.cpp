@@ -42,6 +42,7 @@ Map::~Map() {
  DisjointSet<Region*> mapDisjointSet;
  */
 
+ /*
 std::string Map::route(Point src, Point dst) {
     if (!isPointReachable(src, true) || !isPointReachable(dst, false)) {
         throw PointError(src);
@@ -94,6 +95,7 @@ vector<Region*> Map::regionPathFinidng(Point& src, Point& dst, int bomb_count, u
         }
     return region_route;
 }
+    */
 
 void Map::printMapDisjointSet() {
     for(auto it : regions) {
