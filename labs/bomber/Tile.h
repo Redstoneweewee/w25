@@ -16,6 +16,7 @@ struct Tile {
      * NULL = edge of map
      */
     Tile* neighbors[4] = {NULL};
+    size_t score = 0;
 
     Tile(char type, Point point) {
         this->type = type;
