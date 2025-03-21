@@ -45,11 +45,14 @@ Map::~Map() {
 // Routing Functions ------------------------------------------------------------------------------
 
 std::string Map::route(Point src, Point dst) {
-    if (!isPointValid(src) || !isPointReachable(src, true)) {
+    if(!isPointValid(src)) {
         throw PointError(src);
     }
-    if (!isPointValid(dst) || !isPointReachable(dst, false)) {
+    else if(!isPointValid(dst)) {
         throw PointError(dst);
+    }
+    else if(!isPointReachable(src, true) || !isPointReachable(dst, false)) {
+        throw RouteError(src, dst);
     }
 
     unordered_map<Region*, Region*> visited_connections;
@@ -79,7 +82,8 @@ std::string Map::route(Point src, Point dst) {
     Tile* current_tile = tileMap[src.x][src.y];
     Tile* next_tile;
     unordered_map<Tile*, Tile*> visited_tiles;
-
+    Region* finalRegion = initialRegion;
+    
     // Takes you to the dst's region
     finalRoute.push_back(tileMap[src.x][src.y]);
 
@@ -99,8 +103,15 @@ std::string Map::route(Point src, Point dst) {
         if(s != 0) {
             getAllRegionBombs(finalRoute, current_tile, nextRegion, bomb_count);
         }
+        finalRegion = nextRegion;
     }
+
     Tile* lastRouteTile = finalRoute.size() == 0 ? tileMap[src.x][src.y] : finalRoute[finalRoute.size() - 1];
+    
+    if(getRegion(lastRouteTile) != getRegion(tileMap[dst.x][dst.y]) && finalRegion->perimeter.find(lastRouteTile) == finalRegion->perimeter.end()) {
+        //***** for now just throw route error if the dst is in a wall
+        throw RouteError(src, dst);
+    }
     if (printStuff) cout << "finding route between " << lastRouteTile->point << " and " << tileMap[dst.x][dst.y]->point << "\n";
     appendPath(finalRoute, lastRouteTile, tileMap[dst.x][dst.y]);
     if (printStuff) cout << "Point to point route: " << endl;
