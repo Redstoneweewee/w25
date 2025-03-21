@@ -311,23 +311,16 @@ vector<Tile*> Map::pointPathFinding(bool& reachedEnd, Tile* start, Tile* end, un
 }
 
 
-
 void Map::deleteTempRegion() {
-    if(tempRegion == NULL) { return; }
-    for(Region::Connection* connection : tempRegion->connections) {
-        Region::Connection* deleteC = connection;
-        Region* otherRegion = deleteC->getOther(tempRegion);
-        deleteC->region1->connections.erase(deleteC);
-        deleteC->region2->connections.erase(deleteC);
-        otherRegion->connectedRegions.erase(tempRegion);
-        delete deleteC;
+    // Check if tempRegion is NULL
+    if (tempRegion == nullptr) {
+        return;
     }
-    tempRegion->connections.clear();
     regions.erase(tempRegion->parentTile);
     regionalDisjointSet.erase(tempRegion->parentTile);
     mapDisjointSet.erase(tempRegion);
     delete tempRegion;
-    tempRegion = NULL;
+    tempRegion = nullptr;
 }
 
 
