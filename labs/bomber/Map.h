@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <set>
 #include <unordered_map>
 #include "Point.h"
 #include "Tile.h"
@@ -27,6 +28,9 @@ class Map {
     
     /** This one has sets of connected regions*/
     DisjointSet<Region*> mapDisjointSet;
+
+    /** This is used to initialize all possible 2-region connections */
+    unordered_map<Region*, unordered_set<Region*>> hasDirectConnection;
 public:
     Map(std::istream& stream);
     ~Map();
@@ -39,6 +43,7 @@ public:
     void printRegionalDisjointSet();
     void printRegionConnections();
     void printMapDisjointSet();
+    void printScores() const;
 
 private:
     void initializeCharMap(std::istream& stream);
@@ -46,17 +51,29 @@ private:
     void initializeRegionalDisjointSet();
     void initializeRegions();
     void initializeMapDisjointSet();
+    void initializeTripletConnections();
 
+    void oldInitializeMapDisjointSet();
+    void oldCreateRegionConnections(Region* region);
+
+    bool useNew();
     void initializeAndSetNeighbors(Tile* tile);
     void createRegionFromTile(Tile* tile);
     void createRegionConnections(Region* region);
-
+    bool tryReachThirdRegion(size_t& returnDistance, Tile* startingTile, int xInc, int yInc, Region* region1, Region* region2, Region* region3);
+    void connectRegions(bool canDuplicate, size_t distance, Region* region1, Region* region2, Tile* parentTile1, Tile* parentTile2);
     bool isPointValid(const Point& p) const;
     bool isPointReachable(Point& p, bool isStartingPoint) const;
     Tile* getTile(const Point& p) const;
     Region* getRegion(Tile* t);
     std::array<Point, 4> calculateNeighborPoints(const Point& p);
-
+    vector<vector<size_t>> countTileSteps(size_t m, size_t n);
+    bool isUsefulPath(Region* region, Region* otherRegion, Tile* tile1, Tile* tile2);
+    set<pair<Tile*, array<Region*, 3>>> calculateOptimalTriplet(vector<Region*> triplet);
+    
+    Point getTopLeft(Tile* tile1, Tile* tile2);
+    Point getBottomRight(Tile* tile1, Tile* tile2);
+    vector<Tile*> createTileBox(Point topLeft, Point bottomRight);
     //vector<Region*> regionPathFinidng(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_nodes);
 };
 
