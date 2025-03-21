@@ -31,7 +31,7 @@ public:
     Map(std::istream& stream);
     ~Map();
 
-    std::string route(Point src, Point dst);
+    std::string route(Point& src, Point& dst);
     void printMap() const;
     void printPerimeter() const;
     void printRegionsFromDisjointSet();
@@ -57,7 +57,8 @@ private:
     Region* getRegion(Tile* t);
     std::array<Point, 4> calculateNeighborPoints(const Point& p);
 
-    vector<Region*> regionPathFinidng(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_nodes);
+    vector<Region::Connection*> regionPathFinding(Point& src, Point& dst, size_t bomb_count, unordered_map<Region*, Region*>& visited_connections);
+    vector<Tile*> pointPathFinding(Tile* start, Tile* end, size_t& bomb_count, unordered_map<Tile*, Tile*>& visited_tiles);
 };
 
 #endif
