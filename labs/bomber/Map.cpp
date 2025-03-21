@@ -60,11 +60,49 @@ std::string Map::route(Point src, Point dst) {
     int bomb_count = initialRegion->bombs.size();
     vector<Region::Connection*> region_route_to_dst;
 
+
     if (tileMap[dst.x][dst.y]->type == '#') {
-        bomb_count = 0;
-    } else {
-        region_route_to_dst = regionPathFinding(src, dst, bomb_count, visited_connections);
+        if(printStuff) cout << "dest is inside a wall\n";
+        Tile* dstTile = tileMap[dst.x][dst.y];
+        unordered_map<Region*, Tile*> closestRegions;
+        size_t minDistance = 99999999;
+        for(auto it : regions) {
+            Region* region = it.second;
+            for(Tile* perimeter : region->perimeter) {
+                size_t distance = abs(dstTile->point.x-perimeter->point.x) + abs(dstTile->point.y-perimeter->point.y);
+                if(distance < minDistance) {
+                    closestRegions.clear();
+                    closestRegions.insert({region, perimeter});
+                    minDistance = distance;
+                }
+                else if(distance == minDistance) {
+                    closestRegions.insert({region, perimeter});
+                }
+            }
+        }
+        //weight of connections is minDistance + 1 cuz it is a pseudo lockedRegion
+        tempRegion = new Region{};
+        tempRegion->parentTile = dstTile;
+        tempRegion->regionName = 'W';
+        tempRegion->setLockedRegion(true);
+        for(auto it : closestRegions) {
+            Region::Connection* connection = new Region::Connection{minDistance+1, it.first, it.second, tempRegion, dstTile};
+            it.first->connections.insert(connection);
+            tempRegion->connections.insert(connection);
+            it.first->connectedRegions.insert(tempRegion);
+            tempRegion->connectedRegions.insert(it.first);
+            
+            regions.insert({tempRegion->parentTile, tempRegion});
+            regionalDisjointSet.add(tempRegion->parentTile);
+            mapDisjointSet.add(tempRegion);
+            mapDisjointSet.unite(tempRegion, it.first);
+            
+            if(printStuff) cout << "inside a wall connection: " << it.first->regionName << "<-" << minDistance+1 << "->" << tempRegion->regionName << "\n";
+        }
     }
+
+    region_route_to_dst = regionPathFinding(src, dst, bomb_count, visited_connections);
+    
 
     if (printStuff) cout << "Calculated route: " << endl;
     if (printStuff) cout << "[";
@@ -157,6 +195,9 @@ std::string Map::route(Point src, Point dst) {
     }
     reverse(instructions.begin(), instructions.end());
     if (printStuff) cout << "string form: " << instructions << endl;
+    
+    deleteTempRegion();
+
     return instructions;
 }
 
@@ -268,6 +309,34 @@ vector<Tile*> Map::pointPathFinding(bool& reachedEnd, Tile* start, Tile* end, un
     reachedEnd = false;
     return point_route;
 }
+
+
+
+void Map::deleteTempRegion() {
+    if(tempRegion == NULL) { return; }
+    for(Region::Connection* connection : tempRegion->connections) {
+        Region::Connection* deleteC = connection;
+        Region* otherRegion = deleteC->getOther(tempRegion);
+        deleteC->region1->connections.erase(deleteC);
+        deleteC->region2->connections.erase(deleteC);
+        otherRegion->connectedRegions.erase(tempRegion);
+        delete deleteC;
+    }
+    tempRegion->connections.clear();
+    regions.erase(tempRegion->parentTile);
+    regionalDisjointSet.erase(tempRegion->parentTile);
+    mapDisjointSet.erase(tempRegion);
+    delete tempRegion;
+    tempRegion = NULL;
+}
+
+
+
+
+
+
+
+
 
 // Printing Functions ------------------------------------------------------------------------------
 

@@ -27,11 +27,11 @@ int main(int argc, char** argv) {
   }
 
   Map map(stream);
-  map.setPrintStuff(true);
-  map.printMap();
-  map.printPerimeter();
-  map.printRegionsFromDisjointSet();
-  map.printRegionConnections();
+  map.setPrintStuff(false);
+  //map.printMap();
+  //map.printPerimeter();
+  //map.printRegionsFromDisjointSet();
+  //map.printRegionConnections();
 
   while(true) {
     Point src;

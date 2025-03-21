@@ -36,6 +36,13 @@ public:
         return parent[element];
     }
 
+    /**
+     * Only used for tempRegions!!!!!!!!
+     */
+    void erase(T element) {
+        parent.erase(element);
+    }
+
     // Unites two sets
     void unite(T a, T b) {
         T rootA = find(a);
