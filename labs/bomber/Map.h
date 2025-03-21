@@ -79,7 +79,7 @@ private:
     vector<Tile*> createTileBox(Point topLeft, Point bottomRight);
     
     vector<Region::Connection*> regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections);
-    vector<Tile*> pointPathFinding(Tile* start, Tile* end, unordered_map<Tile*, Tile*>& visited_tiles);
+    vector<Tile*> pointPathFinding(bool& reachedEnd, Tile* start, Tile* end, unordered_set<Tile*>& visited_tiles);
     void appendPath(vector<Tile*>& finalRoute, Tile*& currentTile, Tile* nextTile);
     void getAllRegionBombs(vector<Tile*>& finalRoute, Tile*& currentTile, Region* region, int& bombCount);
 

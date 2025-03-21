@@ -82,33 +82,45 @@ std::string Map::route(Point src, Point dst) {
     Tile* current_tile = tileMap[src.x][src.y];
     Tile* next_tile;
     unordered_map<Tile*, Tile*> visited_tiles;
-    Region* finalRegion = initialRegion;
+    Region* currentRegion = initialRegion;
     
     // Takes you to the dst's region
     finalRoute.push_back(tileMap[src.x][src.y]);
 
-    if(region_route_to_dst.size() > 0) { //only get bombs if we need to go to other regions
-        getAllRegionBombs(finalRoute, current_tile, initialRegion, bomb_count);
-    }
-
     for (int s = region_route_to_dst.size() - 1; s >= 0; s--) {
-        Region* nextRegion = region_route_to_dst[s]->getOther(getRegion(current_tile));
+        // Get all bombs in region, unless it's the last region
+        getAllRegionBombs(finalRoute, current_tile, currentRegion, bomb_count);
+        appendPath(finalRoute, current_tile, region_route_to_dst[s]->getSelfTile(currentRegion));
+        Region* nextRegion = region_route_to_dst[s]->getOther(currentRegion);
         next_tile = region_route_to_dst[s]->getSelfTile(nextRegion);
         // Go to the region
-        if (printStuff) cout << "current_tile: " << current_tile->point << ", next: " << next_tile->point << "\n";
-        appendPath(finalRoute, current_tile, next_tile);
-        if (printStuff) cout << "subtracted bomb count by " << region_route_to_dst[s]->weight << "\n";
-        bomb_count -= region_route_to_dst[s]->weight;
-        // Get all bombs in region, unless it's the last region
-        if(s != 0) {
-            getAllRegionBombs(finalRoute, current_tile, nextRegion, bomb_count);
+        if (printStuff) cout << "current region: " << current_tile->point << ", next region: " << next_tile->point << "\n";
+        int deltaX = next_tile->point.x - current_tile->point.x;
+        int deltaY = next_tile->point.y - current_tile->point.y;
+        int xInc = deltaX < 0 ? 1 : -1;
+        int yInc = deltaY < 0 ? 1 : -1;
+        while(deltaX != 0) {
+            deltaX += xInc;
+            current_tile = tileMap[current_tile->point.x - xInc][current_tile->point.y];
+            finalRoute.push_back(current_tile);
         }
-        finalRegion = nextRegion;
+        while(deltaY != 0) {
+            deltaY += yInc;
+            current_tile = tileMap[current_tile->point.x][current_tile->point.y - yInc];
+            finalRoute.push_back(current_tile);
+        }
+        //if (printStuff) cout << "subtracted bomb count by " << region_route_to_dst[s]->weight << "\n";
+        bomb_count -= region_route_to_dst[s]->weight;
+        currentRegion = nextRegion;
+        //cout << "next region: " << nextRegion->regionName << "\n";
     }
 
     Tile* lastRouteTile = finalRoute.size() == 0 ? tileMap[src.x][src.y] : finalRoute[finalRoute.size() - 1];
     
-    if(getRegion(lastRouteTile) != getRegion(tileMap[dst.x][dst.y]) && finalRegion->perimeter.find(lastRouteTile) == finalRegion->perimeter.end()) {
+    for (Tile* current_direction : finalRoute) {
+        if (printStuff) cout << "(" << current_direction->point.x << ", " << current_direction->point.y << ") --> ";
+    }
+    if(getRegion(lastRouteTile) != getRegion(tileMap[dst.x][dst.y]) && currentRegion->perimeter.find(lastRouteTile) == currentRegion->perimeter.end()) {
         //***** for now just throw route error if the dst is in a wall
         throw RouteError(src, dst);
     }
@@ -149,8 +161,22 @@ std::string Map::route(Point src, Point dst) {
 }
 
 void Map::appendPath(vector<Tile*>& finalRoute, Tile*& currentTile, Tile* nextTile) {
-    unordered_map<Tile*, Tile*> visited_tiles;
-    vector<Tile*> update_route = pointPathFinding(currentTile, nextTile, visited_tiles);
+    unordered_set<Tile*> visited_tiles;
+    Tile* startTile = currentTile;
+    vector<Tile*> update_route;
+    bool reachedEnd = false;
+    for(size_t i=0; i<4; i++) {
+        update_route = pointPathFinding(reachedEnd, startTile, nextTile, visited_tiles);
+        visited_tiles.clear();
+        if(reachedEnd) { 
+            //cout << "found good route: ";
+            //for(Tile* t : update_route) {
+            //    cout << t->point << ", ";
+            //}
+            currentTile = startTile;
+            break;
+        }
+    }
     reverse(update_route.begin(), update_route.end());
     for (Tile* tile : update_route) {
         finalRoute.push_back(tile);
@@ -161,6 +187,7 @@ void Map::appendPath(vector<Tile*>& finalRoute, Tile*& currentTile, Tile* nextTi
 void Map::getAllRegionBombs(vector<Tile*>& finalRoute, Tile*& currentTile, Region* region, int& bombCount) {
     bombCount += region->bombs.size();
     for (Tile* bombTile : region->bombs) {
+        if(printStuff) cout << "getting bomb: " << currentTile->point << ", " << bombTile->point << "\n";
         appendPath(finalRoute, currentTile, bombTile);
     }
 }
@@ -201,9 +228,9 @@ vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int b
     return region_route;
 }
 
-vector<Tile*> Map::pointPathFinding(Tile* start, Tile* end, unordered_map<Tile*, Tile*>& visited_tiles) {
+vector<Tile*> Map::pointPathFinding(bool& reachedEnd, Tile* start, Tile* end, unordered_set<Tile*>& visited_tiles) {
     vector<Tile*> point_route;
-    visited_tiles[start] = start;
+    visited_tiles.insert(start);
 
     for (Tile* current_tile : start->neighbors) {
         if (current_tile == NULL) {
@@ -225,9 +252,11 @@ vector<Tile*> Map::pointPathFinding(Tile* start, Tile* end, unordered_map<Tile*,
         }
         if (current_tile == end) {
             point_route.push_back(current_tile);
+            reachedEnd = true;
             return point_route;
-        } else {
-            vector<Tile*> updated_route = pointPathFinding(current_tile, end, visited_tiles);
+        } 
+        else {
+            vector<Tile*> updated_route = pointPathFinding(reachedEnd, current_tile, end, visited_tiles);
             if (updated_route.size() == 0) {
                 continue;
             }
@@ -236,6 +265,7 @@ vector<Tile*> Map::pointPathFinding(Tile* start, Tile* end, unordered_map<Tile*,
             return point_route;
         }
     }
+    reachedEnd = false;
     return point_route;
 }
 
