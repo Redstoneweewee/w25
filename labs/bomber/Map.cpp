@@ -83,7 +83,9 @@ std::string Map::route(Point src, Point dst) {
     // Takes you to the dst's region
     finalRoute.push_back(tileMap[src.x][src.y]);
 
-    getAllRegionBombs(finalRoute, current_tile, initialRegion, bomb_count);
+    if(region_route_to_dst.size() > 0) { //only get bombs if we need to go to other regions
+        getAllRegionBombs(finalRoute, current_tile, initialRegion, bomb_count);
+    }
 
     for (int s = region_route_to_dst.size() - 1; s >= 0; s--) {
         Region* nextRegion = region_route_to_dst[s]->getOther(getRegion(current_tile));
@@ -93,15 +95,18 @@ std::string Map::route(Point src, Point dst) {
         appendPath(finalRoute, current_tile, next_tile);
         if (printStuff) cout << "subtracted bomb count by " << region_route_to_dst[s]->weight << "\n";
         bomb_count -= region_route_to_dst[s]->weight;
-        // Get all bombs in region
-        getAllRegionBombs(finalRoute, current_tile, nextRegion, bomb_count);
+        // Get all bombs in region, unless it's the last region
+        if(s != 0) {
+            getAllRegionBombs(finalRoute, current_tile, nextRegion, bomb_count);
+        }
     }
     Tile* lastRouteTile = finalRoute.size() == 0 ? tileMap[src.x][src.y] : finalRoute[finalRoute.size() - 1];
     if (printStuff) cout << "finding route between " << lastRouteTile->point << " and " << tileMap[dst.x][dst.y]->point << "\n";
     appendPath(finalRoute, lastRouteTile, tileMap[dst.x][dst.y]);
     if (printStuff) cout << "Point to point route: " << endl;
-    if (finalRoute.size() == 0) {
+    if (finalRoute.size() <= 1) {
         if (printStuff) cout << "this route is empty" << endl;
+        throw RouteError(src, dst);
     }
 
     // FinalRoute is backwards as well
@@ -200,7 +205,11 @@ vector<Tile*> Map::pointPathFinding(Tile* start, Tile* end, unordered_map<Tile*,
 
         if (end->type != '#' && current_tile->type == '#') {
             continue;
-        } else if (end->type == '#' && current_tile->type == '#' && current_tile != end) {
+        } 
+        else if (end->type == '#' && current_tile->type == '#' && current_tile != end) {
+            continue;
+        }
+        else if(current_tile->type == '~') {
             continue;
         }
         if (current_tile == end) {
