@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
   }
 
   Map map(stream);
-  //map.setPrintStuff(interactive);
+  map.setPrintStuff(interactive);
   //map.printMap();
   //map.printPerimeter();
   //map.printRegionsFromDisjointSet();

@@ -42,122 +42,93 @@ Map::~Map() {
     }
 }
 
- /* 
- Member Variables
- size_t height;
- size_t length;
- vector<vector<char>> charMap;
- vector<vector<Tile*>> tileMap;
- unordered_map<Tile*, Region*> regions;
-
- -This one has one set = all tiles in one region
- DisjointSet<Tile*> regionalDisjointSet;
-
- -This one has sets of connected regions
- DisjointSet<Region*> mapDisjointSet;
- */
-
-
-
 // Routing Functions ------------------------------------------------------------------------------
 
-//original was (Point& src, Point& dst)
 std::string Map::route(Point src, Point dst) {
-    if (!isPointReachable(src, true)) {
+    if (!isPointValid(src) || !isPointReachable(src, true)) {
         throw PointError(src);
     }
-    if (!isPointReachable(dst, false)){
+    if (!isPointValid(dst) || !isPointReachable(dst, false)) {
         throw PointError(dst);
     }
 
-    unordered_map<Region*, Region*> visited_connections;  //int is no of bombs needed to get to region
-    Region* initialRegion = getRegion(tileMap[src.y][src.x]);
+    unordered_map<Region*, Region*> visited_connections;
+    Region* initialRegion = getRegion(tileMap[src.x][src.y]);
     int bomb_count = initialRegion->bombs.size();
     vector<Region::Connection*> region_route_to_dst;
 
-    if (tileMap[dst.y][dst.x]->type == '#'){
-        //cout << "detected:" << endl;
-        //placement holder code block, so that program doesn't crash
-        //when dst is a wall (serious problem that needs to be fized)
+    if (tileMap[dst.x][dst.y]->type == '#') {
         bomb_count = 0;
+    } else {
+        region_route_to_dst = regionPathFinding(src, dst, bomb_count, visited_connections);
     }
-    else{
-        region_route_to_dst = regionPathFinding(src, dst,bomb_count,visited_connections);
-    }
-    if(printStuff) cout << "Calculated route: " << endl;
-    if(printStuff) cout << "[";
-    for (Region::Connection* current_connection: region_route_to_dst){
-        if (current_connection == NULL)
-        {
-            if(printStuff) cout << "bitch is empty" << ", ";
-        }
-        else{
-            if(printStuff) cout << "current connection is: " << current_connection->region1->regionName << "-->" << current_connection->region2->regionName << endl;
+
+    if (printStuff) cout << "Calculated route: " << endl;
+    if (printStuff) cout << "[";
+    for (Region::Connection* current_connection : region_route_to_dst) {
+        if (current_connection == NULL) {
+            if (printStuff) cout << "bitch is empty" << ", ";
+        } else {
+            if (printStuff) cout << "current connection is: " << current_connection->region1->regionName << "-->" << current_connection->region2->regionName << endl;
         }
     }
-    if(printStuff) cout << "]" << endl;
+    if (printStuff) cout << "]" << endl;
 
     bomb_count = 0;
     vector<Tile*> finalRoute;
-    Tile* current_tile = tileMap[src.y][src.x];
+    Tile* current_tile = tileMap[src.x][src.y];
     Tile* next_tile;
     unordered_map<Tile*, Tile*> visited_tiles;
 
-    //takes you to the dst's region
-    finalRoute.push_back(tileMap[src.y][src.x]);
+    // Takes you to the dst's region
+    finalRoute.push_back(tileMap[src.x][src.y]);
 
     getAllRegionBombs(finalRoute, current_tile, initialRegion, bomb_count);
 
-
-    for (int s = region_route_to_dst.size()-1; s >= 0; s--){
+    for (int s = region_route_to_dst.size() - 1; s >= 0; s--) {
         Region* nextRegion = region_route_to_dst[s]->getOther(getRegion(current_tile));
         next_tile = region_route_to_dst[s]->getSelfTile(nextRegion);
-        //go to the region
-        if(printStuff) cout << "current_tile: " << current_tile->point << ", next: " << next_tile->point << "\n";
+        // Go to the region
+        if (printStuff) cout << "current_tile: " << current_tile->point << ", next: " << next_tile->point << "\n";
         appendPath(finalRoute, current_tile, next_tile);
-        if(printStuff) cout << "subtracted bomb count by " << region_route_to_dst[s]->weight << "\n";
+        if (printStuff) cout << "subtracted bomb count by " << region_route_to_dst[s]->weight << "\n";
         bomb_count -= region_route_to_dst[s]->weight;
-        //get all bombs in region
+        // Get all bombs in region
         getAllRegionBombs(finalRoute, current_tile, nextRegion, bomb_count);
     }
-    Tile* lastRouteTile = finalRoute.size() == 0 ? tileMap[src.y][src.x] : finalRoute[finalRoute.size()-1];
-    if(printStuff) cout << "finding route between " << lastRouteTile->point << " and " << tileMap[dst.y][dst.x]->point << "\n";
-    appendPath(finalRoute, lastRouteTile, tileMap[dst.y][dst.x]);
-    if(printStuff) cout << "Point to point route: " << endl;
+    Tile* lastRouteTile = finalRoute.size() == 0 ? tileMap[src.x][src.y] : finalRoute[finalRoute.size() - 1];
+    if (printStuff) cout << "finding route between " << lastRouteTile->point << " and " << tileMap[dst.x][dst.y]->point << "\n";
+    appendPath(finalRoute, lastRouteTile, tileMap[dst.x][dst.y]);
+    if (printStuff) cout << "Point to point route: " << endl;
     if (finalRoute.size() == 0) {
-        if(printStuff) cout << "this route is empty" << endl;
+        if (printStuff) cout << "this route is empty" << endl;
     }
 
-    //finalRoute is backwards as well
-    for (Tile* current_direction : finalRoute){
-        if(printStuff) cout << "(" << current_direction->point.x << ", " << current_direction->point.y << ") --> ";
+    // FinalRoute is backwards as well
+    for (Tile* current_direction : finalRoute) {
+        if (printStuff) cout << "(" << current_direction->point.x << ", " << current_direction->point.y << ") --> ";
     }
-    if(printStuff) cout << " the end" << endl;
-    if(printStuff) cout << "Number of bombs left: " << bomb_count << endl;
+    if (printStuff) cout << " the end" << endl;
+    if (printStuff) cout << "Number of bombs left: " << bomb_count << endl;
 
     string instructions = "";
-    for (int i = finalRoute.size() - 1; i > 0; i--){
-            if (finalRoute[i]->point.x != finalRoute[i - 1]->point.x){
-                if (finalRoute[i]->point.x > finalRoute[i - 1]->point.x){
-                    instructions.append("e");
-                    continue;
-                }
-                instructions.append("w");
+    for (int i = finalRoute.size() - 1; i > 0; i--) {
+        if (finalRoute[i]->point.x != finalRoute[i - 1]->point.x) {
+            if (finalRoute[i]->point.x > finalRoute[i - 1]->point.x) {
+                instructions.append("s");
+                continue;
             }
-            else if (finalRoute[i]->point.y != finalRoute[i - 1]->point.y){
-                if (finalRoute[i]->point.y > finalRoute[i - 1]->point.y){
-                    instructions.append("s");
-                    continue;
-                }
-                instructions.append("n");
-
+            instructions.append("n");
+        } else if (finalRoute[i]->point.y != finalRoute[i - 1]->point.y) {
+            if (finalRoute[i]->point.y > finalRoute[i - 1]->point.y) {
+                instructions.append("e"); 
+                continue;
             }
+            instructions.append("w");
+        }
     }
     reverse(instructions.begin(), instructions.end());
-    if(printStuff) cout << "string form: " << instructions << endl;
-    //algorithm to read tile's points (and the changes to get to the next one)
-    //to then find out direction of momvement
-    // as well as to write a string with appropriate symbol
+    if (printStuff) cout << "string form: " << instructions << endl;
     return instructions;
 }
 
@@ -165,7 +136,7 @@ void Map::appendPath(vector<Tile*>& finalRoute, Tile*& currentTile, Tile* nextTi
     unordered_map<Tile*, Tile*> visited_tiles;
     vector<Tile*> update_route = pointPathFinding(currentTile, nextTile, visited_tiles);
     reverse(update_route.begin(), update_route.end());
-    for (Tile* tile: update_route){
+    for (Tile* tile : update_route) {
         finalRoute.push_back(tile);
     }
     currentTile = nextTile;
@@ -173,142 +144,109 @@ void Map::appendPath(vector<Tile*>& finalRoute, Tile*& currentTile, Tile* nextTi
 
 void Map::getAllRegionBombs(vector<Tile*>& finalRoute, Tile*& currentTile, Region* region, int& bombCount) {
     bombCount += region->bombs.size();
-    for(Tile* bombTile : region->bombs) {
+    for (Tile* bombTile : region->bombs) {
         appendPath(finalRoute, currentTile, bombTile);
     }
 }
 
-vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections){
-    //cout << "Entered region pathfinding" << endl;
-    Region* starting_region = getRegion(tileMap[src.y][src.x]);   
-    Region* ending_region = getRegion(tileMap[dst.y][dst.x]);
+vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections) {
+    Region* starting_region = getRegion(tileMap[src.x][src.y]);
+    Region* ending_region = getRegion(tileMap[dst.x][dst.y]);
     visited_connections[starting_region] = starting_region;
     vector<Region::Connection*> region_route;
 
-    if (starting_region == NULL){
+    if (starting_region == NULL) {
         return region_route;
     }
 
-    //cout <<"Initalization finished:" << endl;
-    //Tile* starting_tile = tileMap[src.y][src.x];
-    //Tile* ending_tile = tileMap[dst.y][dst.x];
-
-                //make variables for result from getother()
-        for (Region::Connection* current_connection: starting_region->connections){
-            //cout << "entered neighbor checking:" << endl;
-            //lines of code to check if neighbor region is already in visited (no backtracking allowed)
-            size_t current_bomb_count = bomb_count;
-            auto iterator = visited_connections.find(current_connection->getOther(starting_region));
-            if (iterator != visited_connections.end()){
-                //cout << "already checked node:" << endl;
-                continue;
-            }
-            if (current_connection->getOther(starting_region) == ending_region ){
-                if (bomb_count < (int)current_connection->weight){
-                //cout << "too expensive:" << endl;
-                continue; //indicates that this connection couldn't get to dst
-                }
-                region_route.push_back(current_connection);
-                //cout << "found it";
-                return region_route;
-            } 
-            else if (bomb_count >= (int)current_connection->weight){
-                current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
-                //visited_connections[starting_region] = starting_region;
-                //cout << "checking neighbor's neighbors: " << endl;
-                vector<Region::Connection*> updated_route = regionPathFinding(current_connection->getOther(starting_region)->parentTile->point, dst,current_bomb_count, visited_connections);
-                    if (updated_route.size() == 0){
-                        //cout << "nothing found:" << endl;
-                        continue;
-                    }
-                region_route = updated_route;
-                region_route.push_back(current_connection);
-                //cout << "recursive recall:" << endl;
-                return region_route;
-            }
+    for (Region::Connection* current_connection : starting_region->connections) {
+        size_t current_bomb_count = bomb_count;
+        auto iterator = visited_connections.find(current_connection->getOther(starting_region));
+        if (iterator != visited_connections.end()) {
             continue;
         }
-    //cout << "found completely nothing:" << endl;
+        if (current_connection->getOther(starting_region) == ending_region) {
+            if (bomb_count < (int)current_connection->weight) {
+                continue;
+            }
+            region_route.push_back(current_connection);
+            return region_route;
+        } else if (bomb_count >= (int)current_connection->weight) {
+            current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
+            vector<Region::Connection*> updated_route = regionPathFinding(current_connection->getOther(starting_region)->parentTile->point, dst, current_bomb_count, visited_connections);
+            if (updated_route.size() == 0) {
+                continue;
+            }
+            region_route = updated_route;
+            region_route.push_back(current_connection);
+            return region_route;
+        }
+    }
     return region_route;
 }
 
-//needs system that first directs the algorithm to find bombs (all of them or amount required)
-//and then find the path to dst's region (current systme works but is slow);
-vector<Tile*> Map::pointPathFinding(Tile* start, Tile* end, unordered_map<Tile*, Tile*>& visited_tiles){
+vector<Tile*> Map::pointPathFinding(Tile* start, Tile* end, unordered_map<Tile*, Tile*>& visited_tiles) {
     vector<Tile*> point_route;
     visited_tiles[start] = start;
 
-    for (Tile* current_tile: start->neighbors){
-
-        if (current_tile == NULL){
+    for (Tile* current_tile : start->neighbors) {
+        if (current_tile == NULL) {
             continue;
         }
-        //cout << "entered neighbor checking(points):" << endl;
-        //lines of code to check if neighbor region is already in visited (no backtracking allowed)
         auto iterator = visited_tiles.find(current_tile);
-        if (iterator != visited_tiles.end()){
-            //cout << "already checked node:" << endl;
+        if (iterator != visited_tiles.end()) {
             continue;
         }
 
-        if(end->type != '#' && current_tile->type == '#') {
+        if (end->type != '#' && current_tile->type == '#') {
+            continue;
+        } else if (end->type == '#' && current_tile->type == '#' && current_tile != end) {
             continue;
         }
-        else if(end->type == '#' && current_tile->type == '#' && current_tile != end) {
-            continue;
-        }
-        if (current_tile == end){
+        if (current_tile == end) {
             point_route.push_back(current_tile);
-            //cout << "found it";
             return point_route;
-        } 
-        else{
-            //cout << "checking " << current_tile->point << " neighbor's neighbors: " << endl;
-            vector<Tile*> updated_route = pointPathFinding(current_tile,end, visited_tiles);
-                if (updated_route.size() == 0){
-                    //cout << "nothing found:" << endl;
-                    continue;
-                }
+        } else {
+            vector<Tile*> updated_route = pointPathFinding(current_tile, end, visited_tiles);
+            if (updated_route.size() == 0) {
+                continue;
+            }
             point_route = updated_route;
             point_route.push_back(current_tile);
-            //cout << "recursive recall:" << endl;
             return point_route;
         }
-        continue;
     }
-//cout << "found completely nothing:" << endl;
     return point_route;
 }
-
-
 
 // Printing Functions ------------------------------------------------------------------------------
 
 void Map::printMapDisjointSet() {
-    for(auto it : regions) {
+    for (auto it : regions) {
         Region* region = it.second;
         std::cout << "region " << region->regionName << "'s parent: " << mapDisjointSet.find(region)->regionName << "\n";
     }
     std::cout << "\n";
 }
+
 void Map::printRegionConnections() {
-    for(auto it : regions) {
+    for (auto it : regions) {
         Region* region = it.second;
         std::cout << "region " << region->regionName << ": ";
-        for(Region::Connection* connection : region->connections) {
+        for (Region::Connection* connection : region->connections) {
             std::cout << connection->getSelfTile(region)->point << "<-" << connection->weight << "->" << connection->getOtherTile(region)->point << " " << connection->getOther(region)->regionName << ", ";
         }
         std::cout << "\n";
     }
     std::cout << "\n";
 }
+
 void Map::printRegionalDisjointSet() {
-    for(vector<Tile*> row : tileMap) {
-        for(Tile* tile : row) {
-            if(regionalDisjointSet.find(tile) != NULL) {
+    for (vector<Tile*> row : tileMap) {
+        for (Tile* tile : row) {
+            if (regionalDisjointSet.find(tile) != NULL) {
                 std::cout << regionalDisjointSet.find(tile)->point;
-            }
-            else {
+            } else {
                 std::cout << "      ";
             }
         }
@@ -316,12 +254,13 @@ void Map::printRegionalDisjointSet() {
     }
     std::cout << "\n";
 }
+
 void Map::printRegionsFromRegions() {
     char startingChar = 'A';
-    for(auto region : regions) {
+    for (auto region : regions) {
         std::cout << "region " << startingChar << ":\n";
         std::cout << "perimeter: ";
-        for(Tile* perim : region.second->perimeter) {
+        for (Tile* perim : region.second->perimeter) {
             std::cout << perim->point << ", ";
         }
         startingChar++;
@@ -333,32 +272,36 @@ void Map::printRegionsFromRegions() {
 void Map::printRegionsFromDisjointSet() {
     bool first = true;
     size_t rowNum = 0;
-    for(vector<Tile*> row : tileMap) {
-        if(first) {
+    for (vector<Tile*> row : tileMap) {
+        if (first) {
             cout << "  ";
-            for(size_t i=0; i<row.size(); i++) {
-                if(i % 10 == 0) { cout << i/10; }
-                else { cout << " "; }
+            for (size_t i = 0; i < row.size(); i++) {
+                if (i % 10 == 0) {
+                    cout << i / 10;
+                } else {
+                    cout << " ";
+                }
             }
             cout << "\n";
             cout << "  ";
-            for(size_t i=0; i<row.size(); i++) {
+            for (size_t i = 0; i < row.size(); i++) {
                 cout << i % 10;
             }
             cout << "\n";
             first = false;
         }
-        if(rowNum % 10 == 0) { cout << rowNum/10; }
-        else { cout << " "; }
+        if (rowNum % 10 == 0) {
+            cout << rowNum / 10;
+        } else {
+            cout << " ";
+        }
         cout << rowNum % 10;
-        for(Tile* tile : row) {
+        for (Tile* tile : row) {
             Tile* parentTile = regionalDisjointSet.find(tile);
-            if(parentTile != NULL) {
-                //std::cout << "find: " << parentTile->point << "\n";
+            if (parentTile != NULL) {
                 auto it = regions.find(parentTile);
                 std::cout << it->second->regionName;
-            }
-            else {
+            } else {
                 std::cout << " ";
             }
         }
@@ -367,20 +310,20 @@ void Map::printRegionsFromDisjointSet() {
     }
     std::cout << "\n";
 }
+
 void Map::printPerimeter() const {
     unordered_set<Tile*> perimeterTiles;
-    for(auto it : regions) {
+    for (auto it : regions) {
         Region* region = it.second;
-        for(Tile* perimeter : region->perimeter) {
+        for (Tile* perimeter : region->perimeter) {
             perimeterTiles.insert(perimeter);
         }
     }
-    for(vector<Tile*> row : tileMap) {
-        for(Tile* tile : row) {
-            if(perimeterTiles.find(tile) != perimeterTiles.end()) {
+    for (vector<Tile*> row : tileMap) {
+        for (Tile* tile : row) {
+            if (perimeterTiles.find(tile) != perimeterTiles.end()) {
                 std::cout << "X";
-            }
-            else {
+            } else {
                 std::cout << " ";
             }
         }
@@ -388,9 +331,10 @@ void Map::printPerimeter() const {
     }
     std::cout << "\n";
 }
+
 void Map::printMap() const {
-    for(vector<Tile*> row : tileMap) {
-        for(Tile* tile : row) {
+    for (vector<Tile*> row : tileMap) {
+        for (Tile* tile : row) {
             std::cout << tile->type;
         }
         std::cout << "\n";
@@ -399,40 +343,16 @@ void Map::printMap() const {
 }
 
 void Map::printScores() const {
-    for(vector<Tile*> row : tileMap) {
-        for(Tile* tile : row) {
+    for (vector<Tile*> row : tileMap) {
+        for (Tile* tile : row) {
             std::cout << tile->score << "\t";
         }
         std::cout << "\n";
     }
     std::cout << "\n";
 }
-/*
-void Map::printMap() const {
-    for(vector<Tile*> row : tileMap) {
-        for(Tile* tile : row) {
-            std::string str = "[";
-            for(size_t i=0; i<4; i++) {
-                if(tile->neighbors[i] != NULL) {
-                    str += to_string(i);
-                    str += tile->neighbors[i]->type;
-                }
-            }
-            str += "]";
-            std::cout << tile->type << " " << str << " ";
-        }
-        std::cout << "\n";
-    }
-}
-*/
 
-
-
-
-
-
-
-//Partial initialization functions ------------------------------------------------------------------------------
+// Partial initialization functions ------------------------------------------------------------------------------
 void Map::initializeCharMap(std::istream& stream) {
     string currentLine;
 
@@ -446,12 +366,11 @@ void Map::initializeCharMap(std::istream& stream) {
     }
 }
 
-
-//must be done after charMap init
+// Must be done after charMap init
 void Map::initializeTileMap() {
-    for(size_t i=0; i<height; i++) {
+    for (size_t i = 0; i < height; i++) {
         tileMap.push_back(vector<Tile*>{});
-        for(size_t j=0; j<length; j++) {
+        for (size_t j = 0; j < length; j++) {
             tileMap[i].push_back(NULL);
         }
     }
@@ -460,36 +379,34 @@ void Map::initializeTileMap() {
 }
 
 /**
- * must be done after the tile has been initialized
+ * Must be done after the tile has been initialized
  */
 void Map::initializeAndSetNeighbors(Tile*& tile) {
-    tileMap[tile->point.y][tile->point.x] = tile;
+    tileMap[tile->point.x][tile->point.y] = tile;
 
     std::array<Point, 4> neighborPoints = calculateNeighborPoints(tile->point);
-    for(size_t i=0; i<4; i++) {
-        if(isPointValid(neighborPoints[i])) {
-            //std::cout << "testing point (" << neighborPoints[i].x << ", " << neighborPoints[i].y << ")\n";
-            if(getTile(neighborPoints[i]) == NULL) {
-                Tile* neighbor = new Tile(charMap[neighborPoints[i].y][neighborPoints[i].x], neighborPoints[i]);
+    for (size_t i = 0; i < 4; i++) {
+        if (isPointValid(neighborPoints[i])) {
+            if (getTile(neighborPoints[i]) == NULL) {
+                Tile* neighbor = new Tile(charMap[neighborPoints[i].x][neighborPoints[i].y], neighborPoints[i]);
                 initializeAndSetNeighbors(neighbor);
                 tile->neighbors[i] = neighbor;
-            }
-            else {
+            } else {
                 tile->neighbors[i] = getTile(neighborPoints[i]);
             }
 
-            if((tile->type == '.' || tile->type == '*') && tile->neighbors[i]->type == '#') {
+            if ((tile->type == '.' || tile->type == '*') && tile->neighbors[i]->type == '#') {
                 tile->setIsNearPerimeterWall();
             }
         }
     }
-}   
+}
 
-//must be done after tileMap init
+// Must be done after tileMap init
 void Map::initializeRegionalDisjointSet() {
-    for(vector<Tile*> row : tileMap) {
-        for(Tile* tile : row) {
-            if(tile->type == '.' || tile->type == '*') {
+    for (vector<Tile*> row : tileMap) {
+        for (Tile* tile : row) {
+            if (tile->type == '.' || tile->type == '*') {
                 createRegionFromTile(tile);
             }
         }
@@ -498,18 +415,15 @@ void Map::initializeRegionalDisjointSet() {
 
 void Map::createRegionFromTile(Tile* tile) {
     regionalDisjointSet.add(tile);
-    for(size_t i=0; i<4; i++) {
-        if(tile->neighbors[i] != NULL && regionalDisjointSet.find(tile->neighbors[i]) != NULL && 
-          (tile->neighbors[i]->type == '.' || tile->neighbors[i]->type == '*')) {
+    for (size_t i = 0; i < 4; i++) {
+        if (tile->neighbors[i] != NULL && regionalDisjointSet.find(tile->neighbors[i]) != NULL &&
+            (tile->neighbors[i]->type == '.' || tile->neighbors[i]->type == '*')) {
             regionalDisjointSet.unite(tile, tile->neighbors[i]);
-            //cannot just return here because it can lead to disconnected adjacent sets
-            //std::cout << "united " << tile->point << " with " << tile->neighbors[i]->point << "\n";
         }
     }
 }
 
-
-//must be done after regionalDisjointSet init
+// Must be done after regionalDisjointSet init
 void Map::initializeRegions() {
     char startingChar = 'A';               //Mainly for testing purporses, not actually necessary
     for(Tile* parentTile : regionalDisjointSet.allParents) {
@@ -638,7 +552,7 @@ void Map::initializeTripletConnections() {
     }
     vector<vector<char>> testMap(height, vector<char>(length, '.'));
     for(pair<Tile*, array<Region*, 3>> pairs : lockedRegions) {
-        testMap[pairs.first->point.y][pairs.first->point.x] = 'X';
+        testMap[pairs.first->point.x][pairs.first->point.y] = 'X';
     }
     if(printStuff) {
         for(vector<char> row : testMap) {
@@ -691,8 +605,8 @@ void Map::initializeTripletConnections() {
         for(size_t i=0; i<4; i++) {
             size_t distance = 0;
             Point nextPoint = lockedRegionTile->point;
-            int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
-            int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+            int xInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+            int yInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
             bool hasConnected = false;
             while(true) {
                 distance++;
@@ -797,8 +711,8 @@ std::set<pair<Tile*, array<Region*, 3>>> Map::calculateOptimalTriplet(vector<Reg
                 //}
                 for(size_t i=0; i<4; i++) {
                     size_t distance = 0;
-                    int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
-                    int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+                    int xInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+                    int yInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
                     bool reachesThirdRegion = tryReachThirdRegion(distance, tile, xInc, yInc, region1, region2, region3);
                     if(reachesThirdRegion && distance < optimalDistance) {
                         //cout << "new opt path from " << tile->point << " between " << region1->regionName << region2->regionName << region3->regionName<<"\n";
@@ -829,8 +743,8 @@ std::set<pair<Tile*, array<Region*, 3>>> Map::calculateOptimalTriplet(vector<Reg
                  */
                 for(size_t i=0; i<4; i++) {
                     size_t distance = 0;
-                    int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
-                    int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+                    int xInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+                    int yInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
                     bool reachesThirdRegion = tryReachThirdRegion(distance, tile, xInc, yInc, region1, region3, region2);
                     if(reachesThirdRegion && distance < optimalDistance) {
                         lockedRegions.clear();
@@ -859,8 +773,8 @@ std::set<pair<Tile*, array<Region*, 3>>> Map::calculateOptimalTriplet(vector<Reg
                  */
                 for(size_t i=0; i<4; i++) {
                     size_t distance = 0;
-                    int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
-                    int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+                    int xInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+                    int yInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
                     bool reachesThirdRegion = tryReachThirdRegion(distance, tile, xInc, yInc, region2, region3, region1);
                     if(reachesThirdRegion && distance < optimalDistance) {
                         lockedRegions.clear();
@@ -929,8 +843,8 @@ void Map::oldCreateRegionConnections(Region* region) {
             Point nextPoint = testingTile->point;
             size_t numOfWalls = 1;
             Tile* previousNextTile = testingTile;
-            int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
-            int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+            int xInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+            int yInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
             while(true) {
                 nextPoint.x += xInc;
                 nextPoint.y += yInc;
@@ -989,19 +903,19 @@ void Map::oldCreateRegionConnections(Region* region) {
 
 bool Map::isPointValid(const Point p) {
     if(p.x < 0 || p.y < 0) { return false; }
-    if(p.x >= (int)length || p.y >= (int)height) { return false; }
+    if(p.x >= (int)height || p.y >= (int)length) { return false; }
     return true;
 }
 
 bool Map::isPointReachable(Point p, bool isStartingPoint) {
     if(!isPointValid(p)) { return false; }
-    if(charMap[p.y][p.x] == '~') { return false; }
-    if(isStartingPoint && charMap[p.y][p.x] == '#') { return false; }
+    if(charMap[p.x][p.y] == '~') { return false; }
+    if(isStartingPoint && charMap[p.x][p.y] == '#') { return false; }
     return true;
 }
 
 Tile* Map::getTile(const Point& p) const {
-    return tileMap[p.y][p.x];
+    return tileMap[p.x][p.y];
 }
 
 /**
@@ -1022,51 +936,13 @@ Region* Map::getRegion(Tile* t) {
  */
 std::array<Point, 4> Map::calculateNeighborPoints(const Point& p) {
     return {
-        Point(p.x-1, p.y),
         Point(p.x, p.y-1),
-        Point(p.x+1, p.y),
-        Point(p.x, p.y+1)
+        Point(p.x-1, p.y),
+        Point(p.x, p.y+1),
+        Point(p.x+1, p.y)
     };
 }
 
-
-
-vector<vector<size_t>> Map::countTileSteps(size_t m, size_t n) {
-    // Initialize a DP table to store the number of ways to reach each tile
-    vector<vector<size_t>> dp(m, vector<size_t>(n, 0));
-    
-    // Initialize a step count table to store the number of times each tile is stepped on
-    vector<vector<size_t>> stepCount(m, vector<size_t>(n, 0));
-    
-    // Base case: There's only one way to reach the starting tile (0, 0)
-    dp[0][0] = 1;
-    
-    // Fill the DP table
-    for (size_t i = 0; i < m; ++i) {
-        for (size_t j = 0; j < n; ++j) {
-            if (i > 0) {
-                dp[i][j] += dp[i-1][j]; // Move down
-            }
-            if (j > 0) {
-                dp[i][j] += dp[i][j-1]; // Move right
-            }
-        }
-    }
-    
-    // Calculate the number of times each tile is stepped on
-    for (size_t i = 0; i < m; ++i) {
-        for (size_t j = 0; j < n; ++j) {
-            // Number of ways to reach (i, j)
-            size_t waysToReach = dp[i][j];
-            // Number of ways to go from (i, j) to (m-1, n-1)
-            size_t waysToEnd = dp[m-1-i][n-1-j];
-            // Total steps on (i, j) is waysToReach * waysToEnd
-            stepCount[i][j] = waysToReach * waysToEnd;
-        }
-    }
-    
-    return stepCount;
-}
 
 Point Map::getTopLeft(Tile* tile1, Tile* tile2) {
     return Point(tile1->point.x < tile2->point.x ? tile1->point.x : tile2->point.x,
@@ -1081,8 +957,8 @@ Point Map::getBottomRight(Tile* tile1, Tile* tile2) {
 
 vector<Tile*> Map::createTileBox(Point topLeft, Point bottomRight) {
     vector<Tile*> output;
-    for(int i=topLeft.y; i<=bottomRight.y; i++) {
-        for(int j=topLeft.x; j<=bottomRight.x; j++) {
+    for(int i=topLeft.x; i<=bottomRight.x; i++) {
+        for(int j=topLeft.y; j<=bottomRight.y; j++) {
             output.push_back(tileMap[i][j]);
         }
     }

@@ -13,7 +13,7 @@ main: main.cpp
 	g++ main.o Point.o Map.o -o main -g -Wall -Wextra -Werror -Wno-unused-parameter
 	del -f *.o
 
-test: test.cpp
+test: point map test.cpp
 	g++ -c test.cpp -std=c++17 -g -Wall -Wextra -Werror -Wno-unused-parameter
 	g++ test.o Point.o Map.o -o test -g -Wall -Wextra -Werror -Wno-unused-parameter
 	del -f *.o
