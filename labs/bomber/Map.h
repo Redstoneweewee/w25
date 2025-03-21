@@ -53,6 +53,10 @@ private:
     void initializeMapDisjointSet();
     void initializeTripletConnections();
 
+    void oldInitializeMapDisjointSet();
+    void oldCreateRegionConnections(Region* region);
+
+    bool useNew();
     void initializeAndSetNeighbors(Tile* tile);
     void createRegionFromTile(Tile* tile);
     void createRegionConnections(Region* region);
