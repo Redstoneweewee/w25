@@ -45,13 +45,13 @@ Map::~Map() {
 // Routing Functions ------------------------------------------------------------------------------
 
 std::string Map::route(Point src, Point dst) {
-    if(!isPointValid(src)) {
+    if(!isPointValid(src) || !isPointReachable(src, true)) {
         throw PointError(src);
     }
     else if(!isPointValid(dst)) {
         throw PointError(dst);
     }
-    else if(!isPointReachable(src, true) || !isPointReachable(dst, false)) {
+    else if(!isPointReachable(dst, false)) {
         throw RouteError(src, dst);
     }
 
@@ -255,8 +255,14 @@ vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int b
             }
             region_route.push_back(current_connection);
             return region_route;
-        } else if (bomb_count >= (int)current_connection->weight) {
+        } 
+        else if (bomb_count >= (int)current_connection->weight) {
             current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
+            //if current_connection->weight < current_connection->getOther(starting_region)->bombs.size() unlock regions again & can backtrack
+            //but unlocking regions only pertains to this path & after, not before (make new visited_connections)
+            //must also do the same for lockedRegions (only unlocked through this path, going back = make it locked again) --> container of unlocked regions
+            //path to lockedRegion = weight + locked ? 1 : 0
+            //
             vector<Region::Connection*> updated_route = regionPathFinding(current_connection->getOther(starting_region)->parentTile->point, dst, current_bomb_count, visited_connections);
             if (updated_route.size() == 0) {
                 continue;
