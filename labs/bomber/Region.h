@@ -7,6 +7,7 @@
 
 
 struct Region {
+
     struct Connection {
         size_t weight = 0;
         Region* region1 = NULL;
@@ -43,27 +44,32 @@ struct Region {
     std::vector<Tile*> bombs = std::vector<Tile*>{};
     std::unordered_set<Connection*> connections;
     std::unordered_set<Region*> connectedRegions;
-
+    private:
+    bool mIsLockedRegion = false;
+    bool mIsLocked = false;
+    public:
     ~Region() {
-        for(Connection* c : connections) {
+        for (Connection* c : connections) {
             c->getOther(this)->connections.erase(c);
             delete c;
         }
     }
-};
 
-
-struct LockedRegion : public Region {
-    private:
-    bool mIsLocked = true;
-
-    public:
+    void setLockedRegion(bool lock) {
+        mIsLockedRegion = lock;
+        mIsLocked = lock;
+    }
+    bool isLockedRegion() {
+        return mIsLockedRegion;
+    }
     bool isLocked() {
         return mIsLocked;
     }
-    void unlock(int& currentNumOfBombs) {
+    void lock() {
+        mIsLocked = true;
+    }
+    void unlock() {
         mIsLocked = false;
-        currentNumOfBombs--;
     }
 };
 

@@ -29,9 +29,8 @@ int main(int argc, char** argv) {
   map.printMap();
   map.printPerimeter();
   map.printRegionsFromDisjointSet();
-  map.printScores();
   map.printRegionConnections();
-  map.printMapDisjointSet();
+  //map.printMapDisjointSet();
   //map.printRegionsFromRegions();
 
   return 0;

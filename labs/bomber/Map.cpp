@@ -1,6 +1,7 @@
 #include "Map.h"
 #include <sstream>
 #include <array>
+#include <set>
 #include <cmath>
 #include <map>
 #include "Errors.h"
@@ -398,16 +399,9 @@ void Map::createRegionConnections(Region* region) {
             }
         }
         for(auto it : minPaths) {
-            mapDisjointSet.unite(region, otherRegion);
-            hasDirectConnection[region].insert(otherRegion);
-            hasDirectConnection[otherRegion].insert(region);
             Tile* testingTile = it.first;
             for(Tile* otherTile : it.second) {
-                Region::Connection* connection = new Region::Connection{minDistance+1, region, testingTile, otherRegion, otherTile};
-                region->connections.insert(connection);
-                otherRegion->connections.insert(connection);
-                region->connectedRegions.insert(otherRegion);
-                otherRegion->connectedRegions.insert(region);
+                connectRegions(true, minDistance+1, region, otherRegion, testingTile, otherTile);
                 //cout << "shortest path: " << testingTile->point << ", " << otherTile->point << " from region " << region->regionName << " to region " << otherRegion->regionName <<"\n";
                 //Point topLeft = getTopLeft(testingTile, otherTile);
                 //Point bottomRight = getBottomRight(testingTile, otherTile);
@@ -448,7 +442,7 @@ void Map::initializeTripletConnections() {
         regionsVector.push_back(it.second);
     }
 
-    unordered_set<Tile*> lockedRegions;
+    std::set<pair<Tile*, array<Region*, 3>>> lockedRegions;
     size_t n = regionsVector.size();
     for (size_t i = 0; i < n; i++) {
         for (size_t j = i + 1; j < n; j++) {
@@ -459,15 +453,15 @@ void Map::initializeTripletConnections() {
                     continue;
                 }
                 vector<Region*> triplet = {regionsVector[i], regionsVector[j], regionsVector[k]};
-                for(Tile* optimalTile : calculateOptimalTriplet(triplet)) {
-                    lockedRegions.insert(optimalTile);
+                for(pair<Tile*, array<Region*, 3>> pairs : calculateOptimalTriplet(triplet)) {
+                    lockedRegions.insert(pairs);
                 }
             }
         }
     }
     vector<vector<char>> testMap(height, vector<char>(length, '.'));
-    for(Tile* tile : lockedRegions) {
-        testMap[tile->point.y][tile->point.x] = 'X';
+    for(pair<Tile*, array<Region*, 3>> pairs : lockedRegions) {
+        testMap[pairs.first->point.y][pairs.first->point.x] = 'X';
     }
     for(vector<char> row : testMap) {
         for(char tileText : row) {
@@ -476,10 +470,126 @@ void Map::initializeTripletConnections() {
         cout << "\n";
     }
     cout << "\n";
+
+    char lockedRegionName = 'a';
+    for(pair<Tile*, array<Region*, 3>> pairs : lockedRegions) {
+        Tile* lockedRegionTile = pairs.first;
+        Region* region1 = pairs.second[0];
+        Region* region2 = pairs.second[1];
+        Region* region3 = pairs.second[2];
+        Region* lockedRegion = new Region{};
+        lockedRegion->regionName = lockedRegionName;
+        lockedRegion->parentTile = lockedRegionTile;
+        lockedRegion->setLockedRegion(true);
+        lockedRegion->connectedRegions.insert(region1);
+        lockedRegion->connectedRegions.insert(region2);
+        lockedRegion->connectedRegions.insert(region3);
+        regionalDisjointSet.add(lockedRegionTile);
+        mapDisjointSet.add(lockedRegion);
+        regions.insert({lockedRegionTile, lockedRegion});
+        lockedRegionName++;
+    }
+    for(pair<Tile*, array<Region*, 3>> pairs : lockedRegions) {
+        Tile* lockedRegionTile = pairs.first;
+        Region* lockedRegion = getRegion(lockedRegionTile);
+        Region* region1 = pairs.second[0];
+        Region* region2 = pairs.second[1];
+        Region* region3 = pairs.second[2];
+        size_t region1__region2 = 1; //These start at 1 because the lockedRegion itself costs 1
+        size_t region1__region3 = 1;
+        size_t region2__region3 = 1;
+        
+        if(region1->perimeter.find(lockedRegionTile) != region1->perimeter.end()) {
+            connectRegions(false, 0, lockedRegion, region1, lockedRegionTile, lockedRegionTile);
+        }
+        if(region2->perimeter.find(lockedRegionTile) != region2->perimeter.end()) {
+            connectRegions(false, 0, lockedRegion, region2, lockedRegionTile, lockedRegionTile);
+        }
+        if(region3->perimeter.find(lockedRegionTile) != region3->perimeter.end()) {
+            connectRegions(false, 0, lockedRegion, region3, lockedRegionTile, lockedRegionTile);
+        }
+
+        for(size_t i=0; i<4; i++) {
+            size_t distance = 0;
+            Point nextPoint = lockedRegionTile->point;
+            int xInc = i == 0 ? -1 : (i == 2 ? 1 : 0);
+            int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
+            bool hasConnected = false;
+            while(true) {
+                distance++;
+                nextPoint.x += xInc;
+                nextPoint.y += yInc;
+                if(!isPointValid(nextPoint)) { break; }
+                Tile* nextTile = getTile(nextPoint);
+                if(getRegion(nextTile) != NULL && getRegion(nextTile)->isLockedRegion()) {
+                    //found another lockedRegion, so connect them
+                    if(!hasConnected) {
+                        Region* otherLockedRegion = getRegion(nextTile);
+                        //cout << "connecting lockedRegions " << lockedRegion->regionName << " and " << otherLockedRegion->regionName << "\n";
+                        connectRegions(false, distance-1, lockedRegion, otherLockedRegion, lockedRegionTile, nextTile);
+                        hasConnected = true;
+                    }
+                }
+                if(region1->perimeter.find(nextTile) != region1->perimeter.end()) {
+                    if(!hasConnected) {
+                        connectRegions(false, distance, lockedRegion, region1, lockedRegionTile, nextTile);
+                    }
+                    //cout << "connecting regions " << lockedRegion->regionName << " and " << region1->regionName << " dist " << distance << "\n";
+                    region1__region2 += distance;
+                    region1__region3 += distance;
+                    break;
+                }
+                if(region2->perimeter.find(nextTile) != region2->perimeter.end()) {
+                    if(!hasConnected) {
+                        connectRegions(false, distance, lockedRegion, region2, lockedRegionTile, nextTile);
+                    }
+                    //cout << "connecting regions " << lockedRegion->regionName << " and " << region2->regionName << " dist " << distance << "\n";
+                    region1__region2 += distance;
+                    region2__region3 += distance;
+                    break;
+                }
+                if(region3->perimeter.find(nextTile) != region3->perimeter.end()) {
+                    if(!hasConnected) {
+                        connectRegions(false, distance, lockedRegion, region3, lockedRegionTile, nextTile);
+                    }
+                    //cout << "connecting regions " << lockedRegion->regionName << " and " << region3->regionName << " dist " << distance << "\n";
+                    region1__region3 += distance;
+                    region2__region3 += distance;
+                    break;
+                }
+            }
+        }
+        
+        for(Region::Connection* connection : region1->connections) {
+            if(connection->getOther(region1) == region2 && connection->weight >= region1__region2) {
+                Region::Connection* removeConnection = connection;
+                region1->connections.erase(connection);
+                region2->connections.erase(connection);
+                //cout << "deleting connection " << region1->regionName << " and " << region2->regionName << "()" << region3->regionName << ", " << connection->weight << " > " << region1__region2 << "\n";
+                delete removeConnection;
+            }
+            if(connection->getOther(region1) == region3 && connection->weight >= region1__region3) {
+                Region::Connection* removeConnection = connection;
+                region1->connections.erase(connection);
+                region3->connections.erase(connection);
+                //cout << "deleting connection " << region1->regionName << " and " << region3->regionName << "()" << region2->regionName << ", " << connection->weight << " > " << region1__region3 << "\n";
+                delete removeConnection;
+            }
+        }
+        for(Region::Connection* connection : region2->connections) {
+            if(connection->getOther(region2) == region3 && connection->weight >= region2__region3) {
+                Region::Connection* removeConnection = connection;
+                region2->connections.erase(connection);
+                region3->connections.erase(connection);
+                //cout << "deleting connection " << region2->regionName << " and " << region3->regionName << "()" << region1->regionName << ", " << connection->weight << " > " << region2__region3 << "\n";
+                delete removeConnection;
+            }
+        }
+    }
 }
 
 
-unordered_set<Tile*> Map::calculateOptimalTriplet(vector<Region*> triplet) {
+std::set<pair<Tile*, array<Region*, 3>>> Map::calculateOptimalTriplet(vector<Region*> triplet) {
     Region* region1 = triplet[0];
     Region* region2 = triplet[1];
     Region* region3 = triplet[2];
@@ -487,7 +597,7 @@ unordered_set<Tile*> Map::calculateOptimalTriplet(vector<Region*> triplet) {
 
     //Region::Connection* optimalConnection = NULL;
     //optimalTiles should store all lockedRegion tiles
-    unordered_set<Tile*> optimalTiles;
+    std::set<pair<Tile*, array<Region*, 3>>> lockedRegions;
     size_t optimalDistance = 999999;
 
     //region1 <--> region2
@@ -513,13 +623,13 @@ unordered_set<Tile*> Map::calculateOptimalTriplet(vector<Region*> triplet) {
                     bool reachesThirdRegion = tryReachThirdRegion(distance, tile, xInc, yInc, region1, region2, region3);
                     if(reachesThirdRegion && distance < optimalDistance) {
                         //cout << "new opt path from " << tile->point << " between " << region1->regionName << region2->regionName << region3->regionName<<"\n";
-                        optimalTiles.clear();
-                        optimalTiles.insert(tile);
+                        lockedRegions.clear();
+                        lockedRegions.insert({tile, {region1, region2, region3}});
                         optimalDistance = distance;
                     }
                     else if(reachesThirdRegion && distance == optimalDistance) {
                         //cout << "huh " << distance << " " << tile->point << "\n";
-                        optimalTiles.insert(tile);
+                        lockedRegions.insert({tile, {region1, region2, region3}});
                     }
                 }
             }
@@ -544,12 +654,12 @@ unordered_set<Tile*> Map::calculateOptimalTriplet(vector<Region*> triplet) {
                     int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
                     bool reachesThirdRegion = tryReachThirdRegion(distance, tile, xInc, yInc, region1, region3, region2);
                     if(reachesThirdRegion && distance < optimalDistance) {
-                        optimalTiles.clear();
-                        optimalTiles.insert(tile);
+                        lockedRegions.clear();
+                        lockedRegions.insert({tile, {region1, region3, region2}});
                         optimalDistance = distance;
                     }
                     else if(reachesThirdRegion && distance == optimalDistance) {
-                        optimalTiles.insert(tile);
+                        lockedRegions.insert({tile, {region1, region3, region2}});
                     }
                 }
             }
@@ -574,12 +684,12 @@ unordered_set<Tile*> Map::calculateOptimalTriplet(vector<Region*> triplet) {
                     int yInc = i == 1 ? -1 : (i == 3 ? 1 : 0);
                     bool reachesThirdRegion = tryReachThirdRegion(distance, tile, xInc, yInc, region2, region3, region1);
                     if(reachesThirdRegion && distance < optimalDistance) {
-                        optimalTiles.clear();
-                        optimalTiles.insert(tile);
+                        lockedRegions.clear();
+                        lockedRegions.insert({tile, {region2, region3, region1}});
                         optimalDistance = distance;
                     }
                     else if(reachesThirdRegion && distance == optimalDistance) {
-                        optimalTiles.insert(tile);
+                        lockedRegions.insert({tile, {region2, region3, region1}});
                     }
                 }
             }
@@ -590,7 +700,7 @@ unordered_set<Tile*> Map::calculateOptimalTriplet(vector<Region*> triplet) {
     //    std::cout << "lockedRegion tile: " << tile->point << " with dist " << optimalDistance << " connecting regions "
     //              << region1->regionName << region2->regionName << region3->regionName<<"\n";
     //}
-    return optimalTiles;
+    return lockedRegions;
 }
 
 
@@ -723,4 +833,19 @@ vector<Tile*> Map::createTileBox(Point topLeft, Point bottomRight) {
         }
     }
     return output;
+}
+
+void Map::connectRegions(bool canDuplicate, size_t distance, Region* region1, Region* region2, Tile* connectionTile1, Tile* connectionTile2) {
+    if(!canDuplicate && hasDirectConnection[region1].count(region2)) {
+        //cout << "tried to connect already connected regions: " << region1->regionName << ", " << region2->regionName << "\n";
+        return;
+    }
+    Region::Connection* connection = new Region::Connection{distance, region1, connectionTile1, region2, connectionTile2};
+    region1->connections.insert(connection);
+    region2->connections.insert(connection);
+    region1->connectedRegions.insert(region2);
+    region2->connectedRegions.insert(region1);
+    mapDisjointSet.unite(region1, region2);
+    hasDirectConnection[region1].insert(region2);
+    hasDirectConnection[region2].insert(region1);
 }
