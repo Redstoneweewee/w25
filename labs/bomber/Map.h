@@ -16,6 +16,7 @@ using namespace std;
 
 class Map {
     // Member Variables
+    bool printStuff = false;
     size_t height;
     size_t length;
     vector<vector<char>> charMap;
@@ -37,7 +38,7 @@ public:
 
 
     std::string route(Point src, Point dst);
-
+    void setPrintStuff(bool p);
     void printMap() const;
     void printPerimeter() const;
     void printRegionsFromDisjointSet();
@@ -64,8 +65,8 @@ private:
     void createRegionConnections(Region* region);
     bool tryReachThirdRegion(size_t& returnDistance, Tile* startingTile, int xInc, int yInc, Region* region1, Region* region2, Region* region3);
     void connectRegions(bool canDuplicate, size_t distance, Region* region1, Region* region2, Tile* parentTile1, Tile* parentTile2);
-    bool isPointValid(const Point& p) const;
-    bool isPointReachable(Point& p, bool isStartingPoint) const;
+    bool isPointValid(const Point p);
+    bool isPointReachable(Point p, bool isStartingPoint);
     Tile* getTile(const Point& p) const;
     Region* getRegion(Tile* t);
     std::array<Point, 4> calculateNeighborPoints(const Point& p);
@@ -77,8 +78,11 @@ private:
     Point getBottomRight(Tile* tile1, Tile* tile2);
     vector<Tile*> createTileBox(Point topLeft, Point bottomRight);
     
-    vector<Region::Connection*> regionPathFinding(Point& src, Point& dst, size_t bomb_count, unordered_map<Region*, Region*>& visited_connections);
-    vector<Tile*> pointPathFinding(Tile* start, Tile* end, size_t& bomb_count, unordered_map<Tile*, Tile*>& visited_tiles);
+    vector<Region::Connection*> regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections);
+    vector<Tile*> pointPathFinding(Tile* start, Tile* end, unordered_map<Tile*, Tile*>& visited_tiles);
+    void appendPath(vector<Tile*>& finalRoute, Tile*& currentTile, Tile* nextTile);
+    void getAllRegionBombs(vector<Tile*>& finalRoute, Tile*& currentTile, Region* region, int& bombCount);
+
 };
 
 #endif

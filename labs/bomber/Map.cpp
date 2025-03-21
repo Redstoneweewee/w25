@@ -4,9 +4,13 @@
 #include <set>
 #include <cmath>
 #include <map>
+#include <algorithm>
 #include "Errors.h"
 #include "Region.h"
 
+void Map::setPrintStuff(bool p) {
+    printStuff = p;
+}
 
 // Member Functions ------------------------------------------------------------------------------
 Map::Map(std::istream& stream) {
@@ -59,7 +63,6 @@ Map::~Map() {
 
 //original was (Point& src, Point& dst)
 std::string Map::route(Point src, Point dst) {
-    //cout << "entered dumb function:" << endl;
     if (!isPointReachable(src, true)) {
         throw PointError(src);
     }
@@ -67,11 +70,9 @@ std::string Map::route(Point src, Point dst) {
         throw PointError(dst);
     }
 
-
-    //cout << "confirmed valid point:" << endl;
-
     unordered_map<Region*, Region*> visited_connections;  //int is no of bombs needed to get to region
-    size_t bomb_count = getRegion(tileMap[src.y][src.x])->bombs.size();
+    Region* initialRegion = getRegion(tileMap[src.y][src.x]);
+    int bomb_count = initialRegion->bombs.size();
     vector<Region::Connection*> region_route_to_dst;
 
     if (tileMap[dst.y][dst.x]->type == '#'){
@@ -83,18 +84,18 @@ std::string Map::route(Point src, Point dst) {
     else{
         region_route_to_dst = regionPathFinding(src, dst,bomb_count,visited_connections);
     }
-    cout << "Calculated route: " << endl;
-    cout << "[";
+    if(printStuff) cout << "Calculated route: " << endl;
+    if(printStuff) cout << "[";
     for (Region::Connection* current_connection: region_route_to_dst){
         if (current_connection == NULL)
         {
-            cout << "bitch is empty" << ", ";
+            if(printStuff) cout << "bitch is empty" << ", ";
         }
         else{
-            cout << "current connection is: " << current_connection->region1->regionName << "-->" << current_connection->region2->regionName << endl;
+            if(printStuff) cout << "current connection is: " << current_connection->region1->regionName << "-->" << current_connection->region2->regionName << endl;
         }
     }
-    cout << "]" << endl;
+    if(printStuff) cout << "]" << endl;
 
     bomb_count = 0;
     vector<Tile*> finalRoute;
@@ -103,42 +104,45 @@ std::string Map::route(Point src, Point dst) {
     unordered_map<Tile*, Tile*> visited_tiles;
 
     //takes you to the dst's region
-    for (int s = region_route_to_dst.size() -1; s >= 0; s--){
-        if (getRegion(current_tile) == region_route_to_dst[s]->region1){
-            next_tile = region_route_to_dst[s]->tile2;
-        }
-        else {
-            next_tile = region_route_to_dst[s]->tile1;
-        }
-        vector<Tile*> update_route = pointPathFinding(current_tile, next_tile, bomb_count, visited_tiles);
-        for (Tile* tile: update_route){  //might need to adjust for orientation/order of vector
-            finalRoute.push_back(tile);
-        }
-        bomb_count -= region_route_to_dst[s]->weight;
-        current_tile = next_tile;
-    }
     finalRoute.push_back(tileMap[src.y][src.x]);
-    cout << "Point to point route: " << endl;
-    if (finalRoute.size() == 0)
-    {
-    cout << "this route is empty" << endl;
+
+    getAllRegionBombs(finalRoute, current_tile, initialRegion, bomb_count);
+
+
+    for (int s = region_route_to_dst.size()-1; s >= 0; s--){
+        Region* nextRegion = region_route_to_dst[s]->getOther(getRegion(current_tile));
+        next_tile = region_route_to_dst[s]->getSelfTile(nextRegion);
+        //go to the region
+        if(printStuff) cout << "current_tile: " << current_tile->point << ", next: " << next_tile->point << "\n";
+        appendPath(finalRoute, current_tile, next_tile);
+        if(printStuff) cout << "subtracted bomb count by " << region_route_to_dst[s]->weight << "\n";
+        bomb_count -= region_route_to_dst[s]->weight;
+        //get all bombs in region
+        getAllRegionBombs(finalRoute, current_tile, nextRegion, bomb_count);
+    }
+    Tile* lastRouteTile = finalRoute.size() == 0 ? tileMap[src.y][src.x] : finalRoute[finalRoute.size()-1];
+    if(printStuff) cout << "finding route between " << lastRouteTile->point << " and " << tileMap[dst.y][dst.x]->point << "\n";
+    appendPath(finalRoute, lastRouteTile, tileMap[dst.y][dst.x]);
+    if(printStuff) cout << "Point to point route: " << endl;
+    if (finalRoute.size() == 0) {
+        if(printStuff) cout << "this route is empty" << endl;
     }
 
     //finalRoute is backwards as well
-    for (Tile* current_direction: finalRoute){
-        cout << "(" << current_direction->point.x << ", " << current_direction->point.y << ") --> ";
+    for (Tile* current_direction : finalRoute){
+        if(printStuff) cout << "(" << current_direction->point.x << ", " << current_direction->point.y << ") --> ";
     }
-    cout << " the end" << endl;
-    cout << "Number of bombs left: " << bomb_count << endl;
+    if(printStuff) cout << " the end" << endl;
+    if(printStuff) cout << "Number of bombs left: " << bomb_count << endl;
 
     string instructions = "";
     for (int i = finalRoute.size() - 1; i > 0; i--){
             if (finalRoute[i]->point.x != finalRoute[i - 1]->point.x){
                 if (finalRoute[i]->point.x > finalRoute[i - 1]->point.x){
-                    instructions.append("w");
+                    instructions.append("e");
                     continue;
                 }
-                instructions.append("e");
+                instructions.append("w");
             }
             else if (finalRoute[i]->point.y != finalRoute[i - 1]->point.y){
                 if (finalRoute[i]->point.y > finalRoute[i - 1]->point.y){
@@ -149,14 +153,32 @@ std::string Map::route(Point src, Point dst) {
 
             }
     }
-    cout << "string form: " << instructions << endl;
+    reverse(instructions.begin(), instructions.end());
+    if(printStuff) cout << "string form: " << instructions << endl;
     //algorithm to read tile's points (and the changes to get to the next one)
     //to then find out direction of momvement
     // as well as to write a string with appropriate symbol
     return instructions;
 }
 
-vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, size_t bomb_count, unordered_map<Region*, Region*>& visited_connections){
+void Map::appendPath(vector<Tile*>& finalRoute, Tile*& currentTile, Tile* nextTile) {
+    unordered_map<Tile*, Tile*> visited_tiles;
+    vector<Tile*> update_route = pointPathFinding(currentTile, nextTile, visited_tiles);
+    reverse(update_route.begin(), update_route.end());
+    for (Tile* tile: update_route){
+        finalRoute.push_back(tile);
+    }
+    currentTile = nextTile;
+}
+
+void Map::getAllRegionBombs(vector<Tile*>& finalRoute, Tile*& currentTile, Region* region, int& bombCount) {
+    bombCount += region->bombs.size();
+    for(Tile* bombTile : region->bombs) {
+        appendPath(finalRoute, currentTile, bombTile);
+    }
+}
+
+vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections){
     //cout << "Entered region pathfinding" << endl;
     Region* starting_region = getRegion(tileMap[src.y][src.x]);   
     Region* ending_region = getRegion(tileMap[dst.y][dst.x]);
@@ -182,15 +204,15 @@ vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, size_
                 continue;
             }
             if (current_connection->getOther(starting_region) == ending_region ){
-                if (bomb_count < current_connection->weight){
+                if (bomb_count < (int)current_connection->weight){
                 //cout << "too expensive:" << endl;
                 continue; //indicates that this connection couldn't get to dst
                 }
                 region_route.push_back(current_connection);
-            //cout << "found it";
-            return region_route;
+                //cout << "found it";
+                return region_route;
             } 
-            else if (bomb_count >= current_connection->weight){
+            else if (bomb_count >= (int)current_connection->weight){
                 current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
                 //visited_connections[starting_region] = starting_region;
                 //cout << "checking neighbor's neighbors: " << endl;
@@ -212,12 +234,11 @@ vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, size_
 
 //needs system that first directs the algorithm to find bombs (all of them or amount required)
 //and then find the path to dst's region (current systme works but is slow);
-vector<Tile*> Map::pointPathFinding(Tile* start, Tile* end, size_t& bomb_count, unordered_map<Tile*, Tile*>& visited_tiles){
+vector<Tile*> Map::pointPathFinding(Tile* start, Tile* end, unordered_map<Tile*, Tile*>& visited_tiles){
     vector<Tile*> point_route;
     visited_tiles[start] = start;
 
     for (Tile* current_tile: start->neighbors){
-        size_t updated_bomb_count = bomb_count;
 
         if (current_tile == NULL){
             continue;
@@ -230,33 +251,26 @@ vector<Tile*> Map::pointPathFinding(Tile* start, Tile* end, size_t& bomb_count, 
             continue;
         }
 
-        if (current_tile->type == '#'){
-            if (bomb_count == 0){
-                continue;
-            }
-            else{
-                updated_bomb_count += -1;
-            }
+        if(end->type != '#' && current_tile->type == '#') {
+            continue;
         }
-        if (current_tile->type == '*'){
-            updated_bomb_count += 1;
+        else if(end->type == '#' && current_tile->type == '#' && current_tile != end) {
+            continue;
         }
-        if (current_tile == end ){
+        if (current_tile == end){
             point_route.push_back(current_tile);
             //cout << "found it";
-            bomb_count = updated_bomb_count;
             return point_route;
         } 
         else{
-            //cout << "checking neighbor's neighbors: " << endl;
-            vector<Tile*> updated_route = pointPathFinding(current_tile,end,updated_bomb_count, visited_tiles);
+            //cout << "checking " << current_tile->point << " neighbor's neighbors: " << endl;
+            vector<Tile*> updated_route = pointPathFinding(current_tile,end, visited_tiles);
                 if (updated_route.size() == 0){
                     //cout << "nothing found:" << endl;
                     continue;
                 }
             point_route = updated_route;
             point_route.push_back(current_tile);
-            bomb_count = updated_bomb_count;
             //cout << "recursive recall:" << endl;
             return point_route;
         }
@@ -626,13 +640,15 @@ void Map::initializeTripletConnections() {
     for(pair<Tile*, array<Region*, 3>> pairs : lockedRegions) {
         testMap[pairs.first->point.y][pairs.first->point.x] = 'X';
     }
-    for(vector<char> row : testMap) {
-        for(char tileText : row) {
-            cout << tileText;
+    if(printStuff) {
+        for(vector<char> row : testMap) {
+            for(char tileText : row) {
+                cout << tileText;
+            }
+            cout << "\n";
         }
         cout << "\n";
     }
-    cout << "\n";
 
     char lockedRegionName = 'a';
     for(pair<Tile*, array<Region*, 3>> pairs : lockedRegions) {
@@ -971,16 +987,16 @@ void Map::oldCreateRegionConnections(Region* region) {
 
 //Helper functions ------------------------------------------------------------------------------
 
-bool Map::isPointValid(const Point& p) const {
+bool Map::isPointValid(const Point p) {
     if(p.x < 0 || p.y < 0) { return false; }
     if(p.x >= (int)length || p.y >= (int)height) { return false; }
     return true;
 }
 
-bool Map::isPointReachable(Point& p, bool isStartingPoint) const {
+bool Map::isPointReachable(Point p, bool isStartingPoint) {
     if(!isPointValid(p)) { return false; }
-    if(charMap[p.x][p.y] == '~') { return false; }
-    if(isStartingPoint && charMap[p.x][p.y] == '#') { return false; }
+    if(charMap[p.y][p.x] == '~') { return false; }
+    if(isStartingPoint && charMap[p.y][p.x] == '#') { return false; }
     return true;
 }
 
