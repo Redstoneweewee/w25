@@ -35,7 +35,9 @@ public:
     Map(std::istream& stream);
     ~Map();
 
-    //std::string route(Point src, Point dst);
+
+    std::string route(Point src, Point dst);
+
     void printMap() const;
     void printPerimeter() const;
     void printRegionsFromDisjointSet();
@@ -57,7 +59,7 @@ private:
     void oldCreateRegionConnections(Region* region);
 
     bool useNew();
-    void initializeAndSetNeighbors(Tile* tile);
+    void initializeAndSetNeighbors(Tile*& tile);
     void createRegionFromTile(Tile* tile);
     void createRegionConnections(Region* region);
     bool tryReachThirdRegion(size_t& returnDistance, Tile* startingTile, int xInc, int yInc, Region* region1, Region* region2, Region* region3);
@@ -74,7 +76,9 @@ private:
     Point getTopLeft(Tile* tile1, Tile* tile2);
     Point getBottomRight(Tile* tile1, Tile* tile2);
     vector<Tile*> createTileBox(Point topLeft, Point bottomRight);
-    //vector<Region*> regionPathFinidng(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_nodes);
+    
+    vector<Region::Connection*> regionPathFinding(Point& src, Point& dst, size_t bomb_count, unordered_map<Region*, Region*>& visited_connections);
+    vector<Tile*> pointPathFinding(Tile* start, Tile* end, size_t& bomb_count, unordered_map<Tile*, Tile*>& visited_tiles);
 };
 
 #endif
