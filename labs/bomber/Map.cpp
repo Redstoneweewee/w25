@@ -754,16 +754,13 @@ void Map::initializeTripletConnections() {
     char lockedRegionName = 'a';
     for(pair<Tile*, array<Region*, 3>> pairs : lockedRegions) {
         Tile* lockedRegionTile = pairs.first;
-        Region* region1 = pairs.second[0];
-        Region* region2 = pairs.second[1];
-        Region* region3 = pairs.second[2];
         Region* lockedRegion = new Region;
         lockedRegion->regionName = lockedRegionName;
         lockedRegion->parentTile = lockedRegionTile;
         lockedRegion->setLockedRegion(true);
-        lockedRegion->connectedRegions.insert(region1);
-        lockedRegion->connectedRegions.insert(region2);
-        lockedRegion->connectedRegions.insert(region3);
+        //lockedRegion->connectedRegions.insert(region1);
+        //lockedRegion->connectedRegions.insert(region2);
+        //lockedRegion->connectedRegions.insert(region3);
         regionalDisjointSet.add(lockedRegionTile);
         mapDisjointSet.add(lockedRegion);
         regions.insert({lockedRegionTile, lockedRegion});
@@ -839,7 +836,7 @@ void Map::initializeTripletConnections() {
                 }
             }
         }
-        /*
+        
         if(region1 == NULL || region2 == NULL || region3 == NULL) {
             return;
         }
@@ -868,7 +865,7 @@ void Map::initializeTripletConnections() {
                 delete removeConnection;
             }
         }
-        */
+        
     }
 }
 
