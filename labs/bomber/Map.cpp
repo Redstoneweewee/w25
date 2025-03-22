@@ -39,8 +39,8 @@ Map::~Map() {
     }
 
     std::unordered_set<Region::Connection*> unique_connections;
-    for (auto& [_, region] : regions) {
-        for (Region::Connection* conn : region->connections) {
+    for (auto& region : regions) {
+        for (Region::Connection* conn : region.second->connections) {
             unique_connections.insert(conn); // avoid double delete since connection is shared
         }
     }
