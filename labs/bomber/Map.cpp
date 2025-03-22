@@ -55,7 +55,6 @@ std::string Map::route(Point src, Point dst) {
         throw RouteError(src, dst);
     }
 
-    
     unordered_set<Region::Connection*> visited_connections;
     unordered_set<Region*> visited_regions;
     Region* initialRegion = getRegion(tileMap[src.x][src.y]);
@@ -290,7 +289,10 @@ vector<Region::Connection*> Map::regionPathFinding(
         }
 
         // If the neighbor region hasn't been visited and the bomb count is sufficient, explore it
-        int cost = current_connection->weight + neighbor_region->isLockedRegion() ? (unlocked_locked_regions.find(neighbor_region) == unlocked_locked_regions.end()) ? 0 : 1 : 0;
+        int cost = current_connection->weight;
+        if(neighbor_region->isLockedRegion() && unlocked_locked_regions.find(neighbor_region) == unlocked_locked_regions.end()) {
+            cost++;
+        }
         if (bomb_count >= cost && (visited_regions.find(neighbor_region) == visited_regions.end())) {
             if(printStuff) cout << "visiting " << starting_region->regionName << " to " << neighbor_region->regionName << " bombs: " << bomb_count << "\n";
             int new_bomb_count = bomb_count - cost + neighbor_region->bombs.size();
