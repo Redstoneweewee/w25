@@ -32,14 +32,12 @@ Map::Map(std::istream& stream) {
 }
 
 Map::~Map() {
-    // Free all tiles
-    for (vector<Tile*> row : tileMap) {
-        for (Tile* p : row) {
+    for(vector<Tile*> row : tileMap) {
+        for(Tile* p : row) {
             delete p;
         }
     }
 
-    // Free all connections
     std::unordered_set<Region::Connection*> unique_connections;
     for (auto& [_, region] : regions) {
         for (Region::Connection* conn : region->connections) {
@@ -50,9 +48,8 @@ Map::~Map() {
         delete conn;
     }
 
-    // Free all regions
-    for (auto& [_, region] : regions) {
-        delete region;
+    for(auto region : regions) {
+        delete region.second;
     }
 }
 
