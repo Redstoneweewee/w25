@@ -37,7 +37,7 @@ Map::~Map() {
             delete p;
         }
     }
-    for(auto region : regions) {
+    for(auto& region : regions) {
         delete region.second;
     }
 }
@@ -837,9 +837,6 @@ void Map::initializeTripletConnections() {
             }
         }
         
-        if(region1 == NULL || region2 == NULL || region3 == NULL) {
-            return;
-        }
         for(Region::Connection* connection : region1->connections) {
             if(connection->getOther(region1) == region2 && connection->weight >= region1__region2) {
                 Region::Connection* removeConnection = connection;
