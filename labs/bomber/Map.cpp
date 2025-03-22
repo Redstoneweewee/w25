@@ -45,6 +45,10 @@ Map::~Map() {
         }
     }
     for (Region::Connection* conn : unique_connections) {
+        if (conn == NULL)
+        {
+        continue;
+        }
         delete conn;
     }
 
