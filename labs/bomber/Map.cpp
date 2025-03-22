@@ -54,16 +54,16 @@ std::string Map::route(Point src, Point dst) {
     else if(!isPointReachable(src, true) || !isPointReachable(dst, false)) {
         throw RouteError(src, dst);
     }
-
+    
     unordered_map<Region*, Region*> visited_connections;
     Region* initialRegion = getRegion(tileMap[src.x][src.y]);
     int bomb_count = initialRegion->bombs.size();
     vector<Region::Connection*> region_route_to_dst;
-
+    unordered_map<Region*, int> best_Bomb_count;
     if (tileMap[dst.x][dst.y]->type == '#') {
         bomb_count = 0;
     } else {
-        region_route_to_dst = regionPathFinding(src, dst, bomb_count, visited_connections);
+        region_route_to_dst = regionPathFinding(src, dst, bomb_count, visited_connections, best_Bomb_count);
     }
 
     if (printStuff) cout << "Calculated route: " << endl;
@@ -192,20 +192,49 @@ void Map::getAllRegionBombs(vector<Tile*>& finalRoute, Tile*& currentTile, Regio
     }
 }
 
-vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections) {
+/*backtracking should be allowed once you exhaust all possible routes afterward
+until you go all the way back to the initial region & explored all paths
+currently your algo does this
+*/
+
+vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections, unordered_map<Region*, int>& best_Bomb_count) {
+    //cout << "starting initalization: " << endl;
     Region* starting_region = getRegion(tileMap[src.x][src.y]);
     Region* ending_region = getRegion(tileMap[dst.x][dst.y]);
     visited_connections[starting_region] = starting_region;
+    best_Bomb_count[starting_region] = bomb_count;
     vector<Region::Connection*> region_route;
+    //cout << "initalization complete: " << endl;
+        if (starting_region == NULL) {
+            return region_route;
+        }
+        //cout << "current region's node: ";
+        //cout << "(" << src.x << ", " << src.y << ")" << endl;
+        //cout << "bomb count: " << starting_region->bombs.size() << endl;
 
-    if (starting_region == NULL) {
-        return region_route;
-    }
 
     for (Region::Connection* current_connection : starting_region->connections) {
+        
+        //cout << "current neighbor's node: ";
+        //cout << "(" << current_connection->getOtherTile(starting_region)->point.x << ", " << current_connection->getOtherTile(starting_region)->point.y << ")" << endl;
+        //cout << "neighbor's bomb count: " << current_connection->getOther(starting_region)->bombs.size() << endl;
         size_t current_bomb_count = bomb_count;
         auto iterator = visited_connections.find(current_connection->getOther(starting_region));
-        if (iterator != visited_connections.end()) {
+        if (iterator != visited_connections.end()){
+            //cout << "already been here: " << endl;
+            if ( (int)current_bomb_count > best_Bomb_count[current_connection->getOther(starting_region)]){
+                //cout << "new opporunity (more bombs than before)";
+                best_Bomb_count[current_connection->getOther(starting_region)] = current_bomb_count;
+                //current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
+                vector<Region::Connection*> updated_route = regionPathFinding(current_connection->getOther(starting_region)->parentTile->point, dst, current_bomb_count, visited_connections, best_Bomb_count);
+                    if (updated_route.size() == 0) {
+                        continue;
+                    }
+                region_route = updated_route;
+                region_route.push_back(current_connection);
+                return region_route;
+            }
+            //cout << "nothing new here (less or same amount of bombs): " << endl;
             continue;
         }
         if (current_connection->getOther(starting_region) == ending_region) {
@@ -216,7 +245,7 @@ vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int b
             return region_route;
         } else if (bomb_count >= (int)current_connection->weight) {
             current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
-            vector<Region::Connection*> updated_route = regionPathFinding(current_connection->getOther(starting_region)->parentTile->point, dst, current_bomb_count, visited_connections);
+            vector<Region::Connection*> updated_route = regionPathFinding(current_connection->getOther(starting_region)->parentTile->point, dst, current_bomb_count, visited_connections, best_Bomb_count);
             if (updated_route.size() == 0) {
                 continue;
             }
@@ -959,8 +988,8 @@ bool Map::isPointValid(const Point p) {
 
 bool Map::isPointReachable(Point p, bool isStartingPoint) {
     if(!isPointValid(p)) { return false; }
-    if(charMap[p.y][p.x] == '~') { return false; }
-    if(isStartingPoint && charMap[p.y][p.x] == '#') { return false; }
+    if(charMap[p.x][p.y] == '~') { return false; }
+    if(isStartingPoint && charMap[p.x][p.y] == '#') { return false; }
     return true;
 }
 

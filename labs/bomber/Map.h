@@ -78,7 +78,7 @@ private:
     Point getBottomRight(Tile* tile1, Tile* tile2);
     vector<Tile*> createTileBox(Point topLeft, Point bottomRight);
     
-    vector<Region::Connection*> regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections);
+    vector<Region::Connection*> regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections, unordered_map<Region*, int >& best_Bomb_count);
     vector<Tile*> pointPathFinding(bool& reachedEnd, Tile* start, Tile* end, unordered_set<Tile*>& visited_tiles);
     void appendPath(vector<Tile*>& finalRoute, Tile*& currentTile, Tile* nextTile);
     void getAllRegionBombs(vector<Tile*>& finalRoute, Tile*& currentTile, Region* region, int& bombCount);
