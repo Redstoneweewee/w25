@@ -45,13 +45,13 @@ Map::~Map() {
 // Routing Functions ------------------------------------------------------------------------------
 
 std::string Map::route(Point src, Point dst) {
-    if(!isPointValid(src)) {
+    if(!isPointValid(src) || !isPointReachable(src, true)) {
         throw PointError(src);
     }
     else if(!isPointValid(dst)) {
         throw PointError(dst);
     }
-    else if(!isPointReachable(src, true) || !isPointReachable(dst, false)) {
+    else if(!isPointReachable(dst, false)) {
         throw RouteError(src, dst);
     }
     
@@ -59,12 +59,50 @@ std::string Map::route(Point src, Point dst) {
     Region* initialRegion = getRegion(tileMap[src.x][src.y]);
     int bomb_count = initialRegion->bombs.size();
     vector<Region::Connection*> region_route_to_dst;
+
     unordered_map<Region*, int> best_Bomb_count;
     if (tileMap[dst.x][dst.y]->type == '#') {
-        bomb_count = 0;
-    } else {
-        region_route_to_dst = regionPathFinding(src, dst, bomb_count, visited_connections, best_Bomb_count);
+        if(printStuff) cout << "dest is inside a wall\n";
+        Tile* dstTile = tileMap[dst.x][dst.y];
+        unordered_map<Region*, Tile*> closestRegions;
+        size_t minDistance = 99999999;
+        for(auto it : regions) {
+            Region* region = it.second;
+            for(Tile* perimeter : region->perimeter) {
+                size_t distance = abs(dstTile->point.x-perimeter->point.x) + abs(dstTile->point.y-perimeter->point.y);
+                if(distance < minDistance) {
+                    closestRegions.clear();
+                    closestRegions.insert({region, perimeter});
+                    minDistance = distance;
+                }
+                else if(distance == minDistance) {
+                    closestRegions.insert({region, perimeter});
+                }
+            }
+        }
+        //weight of connections is minDistance + 1 cuz it is a pseudo lockedRegion
+        tempRegion = new Region{};
+        tempRegion->parentTile = dstTile;
+        tempRegion->regionName = 'W';
+        tempRegion->setLockedRegion(true);
+        for(auto it : closestRegions) {
+            Region::Connection* connection = new Region::Connection{minDistance+1, it.first, it.second, tempRegion, dstTile};
+            it.first->connections.insert(connection);
+            tempRegion->connections.insert(connection);
+            it.first->connectedRegions.insert(tempRegion);
+            tempRegion->connectedRegions.insert(it.first);
+            
+            regions.insert({tempRegion->parentTile, tempRegion});
+            regionalDisjointSet.add(tempRegion->parentTile);
+            mapDisjointSet.add(tempRegion);
+            mapDisjointSet.unite(tempRegion, it.first);
+            
+            if(printStuff) cout << "inside a wall connection: " << it.first->regionName << "<-" << minDistance+1 << "->" << tempRegion->regionName << "\n";
+        }
     }
+
+    region_route_to_dst = regionPathFinding(src, dst, bomb_count, visited_connections, best_Bomb_count);
+    
 
     if (printStuff) cout << "Calculated route: " << endl;
     if (printStuff) cout << "[";
@@ -157,6 +195,9 @@ std::string Map::route(Point src, Point dst) {
     }
     reverse(instructions.begin(), instructions.end());
     if (printStuff) cout << "string form: " << instructions << endl;
+    
+    deleteTempRegion();
+
     return instructions;
 }
 
@@ -243,8 +284,14 @@ vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int b
             }
             region_route.push_back(current_connection);
             return region_route;
-        } else if (bomb_count >= (int)current_connection->weight) {
+        } 
+        else if (bomb_count >= (int)current_connection->weight) {
             current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
+            //if current_connection->weight < current_connection->getOther(starting_region)->bombs.size() unlock regions again & can backtrack
+            //but unlocking regions only pertains to this path & after, not before (make new visited_connections)
+            //must also do the same for lockedRegions (only unlocked through this path, going back = make it locked again) --> container of unlocked regions
+            //path to lockedRegion = weight + locked ? 1 : 0
+            //
             vector<Region::Connection*> updated_route = regionPathFinding(current_connection->getOther(starting_region)->parentTile->point, dst, current_bomb_count, visited_connections, best_Bomb_count);
             if (updated_route.size() == 0) {
                 continue;
@@ -297,6 +344,27 @@ vector<Tile*> Map::pointPathFinding(bool& reachedEnd, Tile* start, Tile* end, un
     reachedEnd = false;
     return point_route;
 }
+
+
+void Map::deleteTempRegion() {
+    // Check if tempRegion is NULL
+    if (tempRegion == nullptr) {
+        return;
+    }
+    regions.erase(tempRegion->parentTile);
+    regionalDisjointSet.erase(tempRegion->parentTile);
+    mapDisjointSet.erase(tempRegion);
+    delete tempRegion;
+    tempRegion = nullptr;
+}
+
+
+
+
+
+
+
+
 
 // Printing Functions ------------------------------------------------------------------------------
 

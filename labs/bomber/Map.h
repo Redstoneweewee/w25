@@ -32,6 +32,9 @@ class Map {
 
     /** This is used to initialize all possible 2-region connections */
     unordered_map<Region*, unordered_set<Region*>> hasDirectConnection;
+
+    /** Literally only used if the destination is inside a wall. */
+    Region* tempRegion = NULL;
 public:
     Map(std::istream& stream);
     ~Map();
@@ -78,6 +81,7 @@ private:
     Point getBottomRight(Tile* tile1, Tile* tile2);
     vector<Tile*> createTileBox(Point topLeft, Point bottomRight);
     
+    void deleteTempRegion();
     vector<Region::Connection*> regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_map<Region*, Region*>& visited_connections, unordered_map<Region*, int >& best_Bomb_count);
     vector<Tile*> pointPathFinding(bool& reachedEnd, Tile* start, Tile* end, unordered_set<Tile*>& visited_tiles);
     void appendPath(vector<Tile*>& finalRoute, Tile*& currentTile, Tile* nextTile);
