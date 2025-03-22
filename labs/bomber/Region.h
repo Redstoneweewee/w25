@@ -49,9 +49,8 @@ struct Region {
     bool mIsLocked = false;
     public:
     ~Region() {
-        for (Connection* c : connections) {
-            c->getOther(this)->connections.erase(c);
-            delete c;
+        for (auto it = connections.begin(); it != connections.end(); ) {
+            it = connections.erase(it);
         }
     }
 
