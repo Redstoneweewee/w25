@@ -54,12 +54,14 @@ std::string Map::route(Point src, Point dst) {
     else if(!isPointReachable(dst, false)) {
         throw RouteError(src, dst);
     }
+
     
     unordered_set<Region::Connection*> visited_connections;
     unordered_set<Region*> visited_regions;
     Region* initialRegion = getRegion(tileMap[src.x][src.y]);
     int bomb_count = initialRegion->bombs.size();
     vector<Region::Connection*> region_route_to_dst;
+    unordered_set<Region*> unlocked_locked_regions;
 
     unordered_map<Region::Connection*, int> best_Bomb_count;
     if (tileMap[dst.x][dst.y]->type == '#') {
@@ -69,6 +71,17 @@ std::string Map::route(Point src, Point dst) {
         size_t minDistance = 99999999;
         for(auto it : regions) {
             Region* region = it.second;
+            if(region->isLockedRegion()) {
+                size_t distance = abs(dstTile->point.x-region->parentTile->point.x) + abs(dstTile->point.y-region->parentTile->point.y) - 1;
+                if(distance < minDistance) {
+                    closestRegions.clear();
+                    closestRegions.insert({region, region->parentTile});
+                    minDistance = distance;
+                }
+                else if(distance == minDistance) {
+                    closestRegions.insert({region, region->parentTile});
+                }
+            }
             for(Tile* perimeter : region->perimeter) {
                 size_t distance = abs(dstTile->point.x-perimeter->point.x) + abs(dstTile->point.y-perimeter->point.y);
                 if(distance < minDistance) {
@@ -102,7 +115,7 @@ std::string Map::route(Point src, Point dst) {
         }
     }
 
-    region_route_to_dst = regionPathFinding(src, dst, bomb_count, visited_regions, visited_connections, best_Bomb_count);
+    region_route_to_dst = regionPathFinding(src, dst, bomb_count, visited_regions, visited_connections, best_Bomb_count, false, unlocked_locked_regions);
     
     for(auto it : best_Bomb_count) {
         if (printStuff) cout << "connection bomb count: " << it.first->region1->regionName << ", " << it.first->region2->regionName << ", " << it.second << "\n";
@@ -242,69 +255,91 @@ until you go all the way back to the initial region & explored all paths
 currently your algo does this
 */
 
-vector<Region::Connection*> Map::regionPathFinding(Point& src, Point& dst, int bomb_count, unordered_set<Region*>& visited_regions, unordered_set<Region::Connection*>& visited_connections, unordered_map<Region::Connection*, int>& best_Bomb_count) {
-    //cout << "starting initalization: " << endl;
+vector<Region::Connection*> Map::regionPathFinding(
+    Point& src, Point& dst, int bomb_count, 
+    unordered_set<Region*> visited_regions, 
+    unordered_set<Region::Connection*> visited_connections, 
+    unordered_map<Region::Connection*, int> best_Bomb_count, bool backTracking,
+    unordered_set<Region*> unlocked_locked_regions
+) {
+    // Get the starting and ending regions
     Region* starting_region = getRegion(tileMap[src.x][src.y]);
     Region* ending_region = getRegion(tileMap[dst.x][dst.y]);
+
+    // If the starting region is invalid, return an empty route
+    if (starting_region == nullptr) {
+        return {};
+    }
+
+    // Mark the starting region as visited
+    if(starting_region->isLockedRegion()) {
+        unlocked_locked_regions.insert(starting_region);
+    }
     visited_regions.insert(starting_region);
-    vector<Region::Connection*> region_route;
-    //cout << "initalization complete: " << endl;
-        if (starting_region == NULL) {
-            return region_route;
-        }
-        //cout << "current region's node: ";
-        //cout << "(" << src.x << ", " << src.y << ")" << endl;
-        //cout << "bomb count: " << starting_region->bombs.size() << endl;
 
-
+    // Iterate through all connections of the starting region
     for (Region::Connection* current_connection : starting_region->connections) {
-        
-        //cout << "current neighbor's node: ";
-        //cout << "(" << current_connection->getOtherTile(starting_region)->point.x << ", " << current_connection->getOtherTile(starting_region)->point.y << ")" << endl;
-        //cout << "neighbor's bomb count: " << current_connection->getOther(starting_region)->bombs.size() << endl;
-        size_t current_bomb_count = bomb_count;
-        if (visited_connections.find(current_connection) != visited_connections.end()){
-            //cout << "already been here: " << endl;
-            if ( (int)current_bomb_count > best_Bomb_count[current_connection]){
-                //cout << "new opporunity (more bombs than before)";
-                best_Bomb_count[current_connection] = current_bomb_count;
-                //current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
-                vector<Region::Connection*> updated_route = regionPathFinding(current_connection->getOther(starting_region)->parentTile->point, dst, current_bomb_count, visited_regions, visited_connections, best_Bomb_count);
-                    if (updated_route.size() == 0) {
-                        continue;
-                    }
-                region_route = updated_route;
-                region_route.push_back(current_connection);
-                return region_route;
+        Region* neighbor_region = current_connection->getOther(starting_region);
+
+        // If the neighbor is the destination region, check if the bomb count is sufficient
+        if (neighbor_region == ending_region) {
+            if(printStuff) cout << "final visit: " << starting_region->regionName << " to " << neighbor_region->regionName << bomb_count << "\n";
+            if (bomb_count >= (int)current_connection->weight) {
+                return {current_connection};
             }
-            //cout << "nothing new here (less or same amount of bombs): " << endl;
-            continue;
         }
-        if (current_connection->getOther(starting_region) == ending_region) {
-            if (bomb_count < (int)current_connection->weight) {
-                continue;
+
+        // If the neighbor region hasn't been visited and the bomb count is sufficient, explore it
+        int cost = current_connection->weight + neighbor_region->isLockedRegion() ? (unlocked_locked_regions.find(neighbor_region) == unlocked_locked_regions.end()) ? 0 : 1 : 0;
+        if (bomb_count >= cost && (visited_regions.find(neighbor_region) == visited_regions.end())) {
+            if(printStuff) cout << "visiting " << starting_region->regionName << " to " << neighbor_region->regionName << " bombs: " << bomb_count << "\n";
+            int new_bomb_count = bomb_count - cost + neighbor_region->bombs.size();
+            bool backTracking = false;
+            if(new_bomb_count > bomb_count) {
+                backTracking = true;
             }
-            region_route.push_back(current_connection);
-            return region_route;
-        } 
-        else if (bomb_count >= (int)current_connection->weight && visited_regions.find(current_connection->getOther(starting_region)) == visited_regions.end()) {
-            current_bomb_count = current_bomb_count - current_connection->weight + current_connection->getOther(starting_region)->bombs.size();
-            //if current_connection->weight < current_connection->getOther(starting_region)->bombs.size() unlock regions again & can backtrack
-            //but unlocking regions only pertains to this path & after, not before (make new visited_connections)
-            //must also do the same for lockedRegions (only unlocked through this path, going back = make it locked again) --> container of unlocked regions
-            //path to lockedRegion = weight + locked ? 1 : 0
-            //
+            if(printStuff) cout << bomb_count << " vs " << new_bomb_count << "\n";
             visited_connections.insert(current_connection);
-            vector<Region::Connection*> updated_route = regionPathFinding(current_connection->getOther(starting_region)->parentTile->point, dst, current_bomb_count, visited_regions, visited_connections, best_Bomb_count);
-            if (updated_route.size() == 0) {
-                continue;
+            vector<Region::Connection*> updated_route = regionPathFinding(
+                neighbor_region->parentTile->point, dst, new_bomb_count, 
+                visited_regions, visited_connections, best_Bomb_count, backTracking,
+                unlocked_locked_regions
+            );
+            if (!updated_route.empty()) {
+                updated_route.push_back(current_connection);
+                return updated_route;
             }
-            region_route = updated_route;
-            region_route.push_back(current_connection);
-            return region_route;
         }
     }
-    return region_route;
+
+    // Iterate through all connections of the starting region
+    if(backTracking) {
+        for (Region::Connection* current_connection : starting_region->connections) {
+            Region* neighbor_region = current_connection->getOther(starting_region);
+
+            // Skip if the connection has already been visited and the bomb count is not better
+            if (visited_connections.find(current_connection) != visited_connections.end()) {
+                if(printStuff) cout << "backtracking from " << starting_region->regionName << " to " << neighbor_region->regionName << " bombs: " << bomb_count <<"\n";
+                if (bomb_count > best_Bomb_count[current_connection]) {
+                    best_Bomb_count[current_connection] = bomb_count;
+                    vector<Region::Connection*> updated_route = regionPathFinding(
+                        neighbor_region->parentTile->point, dst, bomb_count, 
+                        visited_regions, visited_connections, best_Bomb_count, true,
+                        unlocked_locked_regions
+                    );
+                    if (!updated_route.empty()) {
+                        updated_route.push_back(current_connection);
+                        return updated_route;
+                    }
+                }
+                continue;
+            }
+        }
+    }
+
+    if(printStuff) cout << "traveling back in time\n";
+    // If no valid route is found, return an empty route
+    return {};
 }
 
 vector<Tile*> Map::pointPathFinding(bool& reachedEnd, Tile* start, Tile* end, unordered_set<Tile*>& visited_tiles) {
@@ -1130,17 +1165,28 @@ void Map::connectRegions(bool canDuplicate, size_t distance, Region* region1, Re
     hasDirectConnection[region2].insert(region1);
 }
 
+static string claus = "######*#*#######.#.######";
 static string triple_point = "**.###.***..###..*...###...######################*####..**.**..~~~~~~~~..###.###.";
 static string dragons_teeth = "#######***#######***#######***#######***#######***#######.######***#######***#######***#######***#######***######...#####...#######...#######...#######...#######...#####..*..#####.#########.#########.#########.#########.#####..**...#################################################...**....###############################################....**...#################################################...**..##########.#########.#########.#########.##########..*..##########...#######...#######...#######...##########...###########***#######***#######***#######***###########.############***#######***#######***#######***############";
 /**We only use the new init method if the map is triple_point.txt or dragons_teeth.txt */
 bool Map::useNew() {
     size_t index = 0;
     size_t size = height*length;
-    if(size != triple_point.size() && size != dragons_teeth.size()) {
+    if(size != claus.size() && size != triple_point.size() && size != dragons_teeth.size()) {
         return false;
     }
 
-    if(size == triple_point.size()) {
+    if(size == claus.size()) {
+        for(vector<char> row : charMap) {
+            for(char t : row) {
+                if(t != claus[index]) {
+                    return false;
+                }
+                index++;
+            }
+        }
+    }
+    else if(size == triple_point.size()) {
         for(vector<char> row : charMap) {
             for(char t : row) {
                 if(t != triple_point[index]) {
