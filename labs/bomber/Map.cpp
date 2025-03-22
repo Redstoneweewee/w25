@@ -757,7 +757,7 @@ void Map::initializeTripletConnections() {
         Region* region1 = pairs.second[0];
         Region* region2 = pairs.second[1];
         Region* region3 = pairs.second[2];
-        Region* lockedRegion = new Region{};
+        Region* lockedRegion = new Region;
         lockedRegion->regionName = lockedRegionName;
         lockedRegion->parentTile = lockedRegionTile;
         lockedRegion->setLockedRegion(true);
