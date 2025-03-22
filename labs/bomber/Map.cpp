@@ -754,6 +754,9 @@ void Map::initializeTripletConnections() {
     char lockedRegionName = 'a';
     for(pair<Tile*, array<Region*, 3>> pairs : lockedRegions) {
         Tile* lockedRegionTile = pairs.first;
+            if (regionalDisjointSet.find(lockedRegionTile)){
+                continue;
+            }
         Region* region1 = pairs.second[0];
         Region* region2 = pairs.second[1];
         Region* region3 = pairs.second[2];
