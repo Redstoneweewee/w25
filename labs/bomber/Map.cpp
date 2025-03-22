@@ -839,6 +839,7 @@ void Map::initializeTripletConnections() {
                 }
             }
         }
+        /*
         if(region1 == NULL || region2 == NULL || region3 == NULL) {
             return;
         }
@@ -867,6 +868,7 @@ void Map::initializeTripletConnections() {
                 delete removeConnection;
             }
         }
+        */
     }
 }
 
