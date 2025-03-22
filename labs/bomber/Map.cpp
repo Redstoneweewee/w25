@@ -37,7 +37,6 @@ Map::~Map() {
             delete p;
         }
     }
-    
     for(auto region : regions) {
         delete region.second;
     }
